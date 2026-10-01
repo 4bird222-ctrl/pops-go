@@ -87,6 +87,7 @@ header .date{color:var(--muted);font-size:13.5px}
 .acts{display:flex;align-items:center}
 .hide{border:0;background:none;cursor:pointer;width:32px;height:36px;display:grid;place-items:center;border-radius:50%;color:var(--muted);font-size:18px;line-height:1}
 .hide:hover{background:var(--sunk);color:var(--accent)}
+.hide:disabled{opacity:.25;cursor:default;background:none}
 .pen{border:0;background:none;cursor:pointer;width:32px;height:36px;display:grid;place-items:center;border-radius:50%;color:var(--muted)}
 .pen svg{width:17px;height:17px}
 .pen:hover,.pen[aria-pressed="true"]{background:var(--sunk);color:var(--ink)}
@@ -435,7 +436,7 @@ function evRow(e, now, mode){
   const name = (isNew(e) ? '<span class="new">New</span>' : '')+(e.link ? '<a href="'+esc(e.link)+'" target="_blank" rel="noopener">'+esc(e.name)+'</a>' : esc(e.name));
   const acts = '<div class="acts"><button class="pen" type="button" data-note-edit="'+esc(e.id)+'" data-idx="-1" aria-pressed="'+ed+'" aria-label="Add a note to '+esc(e.name)+'" title="Add a note">'+PEN+'</button>'+
     '<button class="star" type="button" data-star="'+esc(e.id)+'" aria-pressed="'+starred+'" aria-label="'+(starred?'Remove star from ':'Star ')+esc(e.name)+'" title="'+(starred?'Remove star':'Star')+'">'+STAR+'</button>'+
-    '<button class="hide" type="button" data-hide="'+esc(e.id)+'" aria-label="'+(hid?'Bring back ':'Pass on ')+esc(e.name)+'" title="'+(hid?'Bring back':'Pass on this event')+'">'+(hid?'↺':'×')+'</button></div>';
+    '<button class="hide" type="button" data-hide="'+esc(e.id)+'"'+(starred && !hid ? ' disabled' : '')+' aria-label="'+(hid?'Bring back ':'Pass on ')+esc(e.name)+'" title="'+(hid?'Bring back':starred?'Remove the star first to pass on this event':'Pass on this event')+'">'+(hid?'↺':'×')+'</button></div>';
   const meta = '<div class="meta"><a class="chip" href="'+esc(e.link || "https://leekduck.com/events/")+'" target="_blank" rel="noopener">'+esc(label)+'</a>'+cpHtml(e)+when+'</div>';
   const extra = noteHtml + researchHtml(e);
   return '<div class="ev'+(hid?' is-hidden':'')+'" style="--c:'+color+'"><div class="main"><div class="name">'+name+'</div></div>'+acts+meta+
@@ -538,7 +539,8 @@ document.addEventListener("click", ev => {
   if(b.dataset.noteCancel){ noteEditing = null; renderEventLists(); return; }
   if(b.dataset.hide){
     const id = b.dataset.hide, h = hiddenList(), pass = !h.includes(id);
-    S.prefs = {...S.prefs, hidden: pass ? h.concat(id) : h.filter(x => x !== id), starred: pass ? S.prefs.starred.filter(x => x !== id) : S.prefs.starred};
+    if(pass && S.prefs.starred.includes(id)) return;
+    S.prefs = {...S.prefs, hidden: pass ? h.concat(id) : h.filter(x => x !== id)};
     save("prefs"); markSeen([id]); renderEvents(); loadResearch(); return;
   }
   if(b.dataset.edit){ editing[b.dataset.edit] = !editing[b.dataset.edit]; renderLists(); if(editing[b.dataset.edit]) document.getElementById("add-"+b.dataset.edit)?.focus(); return; }
