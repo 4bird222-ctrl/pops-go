@@ -512,8 +512,8 @@ document.addEventListener("click", ev => {
   if(b.dataset.up){ upMode = b.dataset.up; lsSet("upFilter", upMode); renderEvents(); return; }
   if(b.id === "up-open"){ upOpen = !upOpen; lsSet("upOpen", upOpen); renderEvents(); return; }
   if(b.dataset.star){
-    const id = b.dataset.star, st = S.prefs.starred;
-    S.prefs = {...S.prefs, starred: st.includes(id) ? st.filter(x => x !== id) : st.concat(id)};
+    const id = b.dataset.star, st = S.prefs.starred, on = !st.includes(id);
+    S.prefs = {...S.prefs, starred: on ? st.concat(id) : st.filter(x => x !== id), hidden: on ? hiddenList().filter(x => x !== id) : hiddenList()};
     save("prefs"); markSeen([id]); renderEvents(); return;
   }
   if(b.dataset.rshow){ rShow[b.dataset.rshow] = !rShow[b.dataset.rshow]; renderEvents(); return; }
@@ -537,8 +537,8 @@ document.addEventListener("click", ev => {
   }
   if(b.dataset.noteCancel){ noteEditing = null; renderEventLists(); return; }
   if(b.dataset.hide){
-    const id = b.dataset.hide, h = hiddenList();
-    S.prefs = {...S.prefs, hidden: h.includes(id) ? h.filter(x => x !== id) : h.concat(id)};
+    const id = b.dataset.hide, h = hiddenList(), pass = !h.includes(id);
+    S.prefs = {...S.prefs, hidden: pass ? h.concat(id) : h.filter(x => x !== id), starred: pass ? S.prefs.starred.filter(x => x !== id) : S.prefs.starred};
     save("prefs"); markSeen([id]); renderEvents(); loadResearch(); return;
   }
   if(b.dataset.edit){ editing[b.dataset.edit] = !editing[b.dataset.edit]; renderLists(); if(editing[b.dataset.edit]) document.getElementById("add-"+b.dataset.edit)?.focus(); return; }
@@ -577,6 +577,8 @@ document.addEventListener("submit", ev => {
 
 /* ---------- boot ---------- */
 for(const k of DOCS){ const v = lsGet(k); if(v) S[k] = v; }
+// Older saves could have an event both starred and passed; the star wins.
+if(S.prefs.starred.some(id => hiddenList().includes(id))){ S.prefs = {...S.prefs, hidden: hiddenList().filter(id => !S.prefs.starred.includes(id))}; save("prefs"); }
 forgetFinished();
 loadStats();
 ensureSeen();
