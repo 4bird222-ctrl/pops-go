@@ -60,7 +60,7 @@ header{position:relative}
 header h1{white-space:nowrap}
 .nowbtn{position:absolute;right:0;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 13px var(--display);cursor:pointer}
 .nowbtn{letter-spacing:.8px}
-.nowbtn[aria-pressed="true"]{background:var(--surface);color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
+.nowbtn[aria-pressed="false"]{background:var(--surface);color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
 .bulb{border:0;background:none;cursor:pointer;width:32px;height:36px;display:grid;place-items:center;border-radius:50%;color:var(--muted)}
 .bulb svg{width:18px;height:18px}
 .bulb:hover{background:var(--sunk);color:var(--ink)}
@@ -216,10 +216,10 @@ footer{color:var(--muted);font-size:12.5px;text-align:center}
       <h1>Pops Go</h1>
       <div class="date" id="today-label"></div>
     </div>
-    <button class="nowbtn" type="button" id="open-now" aria-pressed="false" aria-label="Show or hide my Now list">NOW</button>
+    <button class="nowbtn" type="button" id="open-now" aria-pressed="true" aria-label="Show or hide my Now list">NOW</button>
   </header>
 
-  <div id="main-view">
+  <div id="main-view" hidden>
 
   <section class="section">
     <div class="sechead">
@@ -253,7 +253,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center}
   <footer>Event data from <a href="https://leekduck.com/events/" target="_blank" rel="noopener">Leek Duck</a>. Tap an event name to open its page.</footer>
   </div>
 
-  <section class="section" id="now-view" hidden>
+  <section class="section" id="now-view">
     <div id="now-body"></div>
     <div class="nowactions">
       <button class="btn ghost" type="button" data-guide="outing">💡 Checklist</button>
@@ -761,9 +761,12 @@ function currentChecks(){
 function renderLists(){
 }
 function alignNow(){
-  const btn = document.getElementById("open-now"), fav = document.querySelector('[data-now="star"]');
-  if(!btn || !fav || !fav.offsetWidth) return;
+  const btn = document.getElementById("open-now"), fav = document.querySelector('[data-now="star"]'), main = document.getElementById("main-view");
+  if(!btn || !fav) return;
+  const wasHidden = main.hidden; main.hidden = false;
   const f = fav.getBoundingClientRect(), hd = btn.parentElement.getBoundingClientRect();
+  main.hidden = wasHidden;
+  if(!f.width) return;
   btn.style.right = "auto";
   btn.style.left = Math.min(hd.width - btn.offsetWidth, f.left + f.width / 2 - hd.left - btn.offsetWidth / 2 + 14)+"px";
 }
@@ -862,6 +865,7 @@ forgetFinished();
 loadStats();
 ensureSeen();
 render();
+showNowView(true);
 setInterval(renderEvents, 60000);
 document.addEventListener("visibilitychange", () => { if(!document.hidden) render(); });
 
