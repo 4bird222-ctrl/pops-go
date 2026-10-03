@@ -74,6 +74,7 @@ header h1{white-space:nowrap}
 .nowline:first-child{border-top:0}
 .dot{flex:none;width:24px;height:24px;margin-top:-1px;border-radius:50%;background:var(--c);color:#fff;font:600 12px/24px var(--body);text-align:center;font-variant-numeric:tabular-nums}
 .dot.plain{background:var(--line)}
+.dot.soon{background:var(--surface);color:var(--c);box-shadow:inset 0 0 0 2px var(--c);line-height:24px}
 .nowline > span:not(.dot){flex:1;min-width:0;overflow-wrap:anywhere}
 .nowtext{cursor:text}
 .nowform{flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:6px}
@@ -605,12 +606,15 @@ function renderNow(){
   const body = document.getElementById("now-body"), now = new Date(), evs = S.events.items || [];
   const rows = nowItems().map((i, n) => {
     const e = i.ev === "outing" ? null : evs.find(x => x.id === i.ev);
-    const days = e ? Math.max(0, Math.floor((new Date(e.end) - now) / 864e5)) : null;
-    return {i, n, e, days, color: e ? typeOf(e)[1] : ""};
-  }).sort((a, b) => (a.days === null) - (b.days === null) || (a.e && b.e ? new Date(a.e.end) - new Date(b.e.end) : 0) || a.n - b.n);
+    // On now: filled dot, days until it ends. Not started yet: outlined dot, days until it starts.
+    const soon = !!e && new Date(e.start) > now;
+    const days = e ? Math.max(0, Math.floor((new Date(soon ? e.start : e.end) - now) / 864e5)) : null;
+    const rank = !e ? 2 : soon ? 1 : 0, at = e ? +new Date(soon ? e.start : e.end) : 0;
+    return {i, n, e, days, soon, rank, at, color: e ? typeOf(e)[1] : ""};
+  }).sort((a, b) => a.rank - b.rank || a.at - b.at || a.n - b.n);
   if(!rows.length){ body.innerHTML = '<div class="nowlist"><div class="nowline"><span style="color:var(--muted)">Nothing here yet. Tap 💡 on an event and + the steps you want.</span></div></div>'; return; }
-  body.innerHTML = '<div class="nowlist">'+rows.map(({i, e, days, color}) =>
-    '<div class="nowline">'+(e ? '<span class="dot" style="--c:'+color+'" title="'+esc(e.name)+': '+days+' day'+(days === 1 ? '' : 's')+' left">'+days+'</span>' : '<span class="dot plain" title="Checklist"></span>')+
+  body.innerHTML = '<div class="nowlist">'+rows.map(({i, e, days, soon, color}) =>
+    '<div class="nowline">'+(e ? '<span class="dot'+(soon ? ' soon' : '')+'" style="--c:'+color+'" title="'+esc(e.name)+': '+(soon ? 'starts in ' : '')+days+' day'+(days === 1 ? '' : 's')+(soon ? '' : ' left')+'">'+days+'</span>' : '<span class="dot plain" title="Checklist"></span>')+
     (nowEdit === i.id
       ? '<form class="nowform" data-nowedit="'+esc(i.id)+'"><input id="now-input" value="'+esc(i.text)+'" autocomplete="off" maxlength="160"><button class="btn small" type="submit">Save</button><button class="btn ghost small" type="button" data-nowcancel="1">Cancel</button></form>'
       : '<span class="nowtext" data-nowtext="'+esc(i.id)+'">'+esc(i.text)+'</span>')+'<button class="x" type="button" data-nowdone="'+esc(i.id)+'" aria-label="Done: '+esc(i.text)+'">×</button></div>').join("")+'</div>';
