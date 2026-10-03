@@ -67,7 +67,7 @@ header h1{white-space:nowrap}
 .bulb.has{color:#e0a800}
 .bulb{position:relative}
 .bulb.unseen::after{content:"";position:absolute;top:6px;right:4px;width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--surface)}
-.nbadge{position:absolute;top:-7px;right:-9px;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:#f2b705;color:#15212c;font:700 11px/19px var(--body);text-align:center;box-shadow:0 0 0 2px var(--bg)}
+.newbtn,.newbtn[aria-pressed]{background:var(--accent);color:var(--accent-ink);box-shadow:none}
 /* Now list: plain text on white */
 .nowhead{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .nowlist{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px 0}
@@ -219,7 +219,8 @@ footer{color:var(--muted);font-size:12.5px;text-align:center}
       <h1>Pops Go</h1>
       <div class="date" id="today-label"></div>
     </div>
-    <button class="nowbtn" type="button" id="open-now" aria-pressed="true" aria-label="Show or hide my Now list">NOW<span class="nbadge" id="new-badge" hidden></span></button>
+    <button class="nowbtn" type="button" id="open-now" aria-pressed="true" aria-label="Show or hide my Now list">NOW</button>
+    <button class="nowbtn newbtn" type="button" id="open-new" hidden aria-label="New events to review">NEW</button>
   </header>
 
   <div id="main-view" hidden>
@@ -634,6 +635,13 @@ document.addEventListener("click", ev => {
   const bg = document.getElementById("sheet");
   if(ev.target === bg){ closeSheet(); return; }
   const b = ev.target.closest("button"); if(!b) return;
+  if(b.id === "open-new"){
+    nowMode = "all"; upMode = "all"; upOpen = true; lsSet("nowMode", nowMode); lsSet("upFilter", upMode); lsSet("upOpen", upOpen);
+    showNowView(false);
+    const first = document.querySelector(".bulb.unseen");
+    if(first) first.closest(".ev").scrollIntoView({behavior: "smooth", block: "center"});
+    return;
+  }
   if(b.id === "open-now"){ showNowView(document.getElementById("now-view").hidden); return; }
   if(b.dataset.guide){ openSheet(b.dataset.guide); return; }
   if(b.dataset.nowcancel){ nowEdit = null; renderNow(); return; }
@@ -716,8 +724,9 @@ function renderEvents(){
 function updateNewBadge(){
   const now = new Date(), horizon = new Date(+now + DAYS_AHEAD*864e5), hl = hiddenList();
   const n = (S.events.items || []).filter(e => isNew(e) && !hl.includes(e.id) && new Date(e.end) > now && new Date(e.start) < horizon).length;
-  const b = document.getElementById("new-badge"); b.textContent = n; b.hidden = !n;
-  document.getElementById("open-now").setAttribute("aria-label", "Show or hide my Now list"+(n ? ". "+n+" new event"+(n === 1 ? "" : "s")+" to review" : ""));
+  const b = document.getElementById("open-new"), was = b.hidden;
+  b.hidden = !n; b.setAttribute("aria-label", n+" new event"+(n === 1 ? "" : "s")+" to review");
+  if(was !== b.hidden) alignNow();
 }
 function renderEventLists(){
   updateNewBadge();
@@ -780,7 +789,10 @@ function alignNow(){
   main.hidden = wasHidden;
   if(!f.width) return;
   btn.style.right = "auto";
-  btn.style.left = Math.min(hd.width - btn.offsetWidth, f.left + f.width / 2 - hd.left - btn.offsetWidth / 2 + 14)+"px";
+  const left = Math.min(hd.width - btn.offsetWidth, f.left + f.width / 2 - hd.left - btn.offsetWidth / 2 + 14);
+  btn.style.left = left+"px";
+  const nb = document.getElementById("open-new");
+  nb.style.right = "auto"; nb.style.left = (left - (nb.offsetWidth || 52) - 8)+"px";
 }
 window.addEventListener("resize", alignNow);
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(alignNow);
