@@ -56,7 +56,9 @@ header{display:flex;align-items:center;gap:16px}
 header .who{flex:1;min-width:0}
 header .date{color:var(--muted);font-size:13.5px}
 .beta{display:inline-block;vertical-align:6px;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--sunk);color:var(--muted);font:600 11px/1.5 var(--body);letter-spacing:.6px;text-transform:uppercase}
-.nowbtn{display:inline-flex;align-items:center;gap:7px;flex:none;padding:8px 14px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 15px var(--display);cursor:pointer}
+header{position:relative}
+header h1{white-space:nowrap}
+.nowbtn{position:absolute;right:0;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 13px var(--display);cursor:pointer}
 .nowbtn{letter-spacing:.8px}
 .nowbtn[aria-pressed="true"]{background:var(--surface);color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
 .bulb{border:0;background:none;cursor:pointer;width:32px;height:36px;display:grid;place-items:center;border-radius:50%;color:var(--muted)}
@@ -73,6 +75,9 @@ header .date{color:var(--muted);font-size:13.5px}
 .dot{flex:none;width:24px;height:24px;margin-top:-1px;border-radius:50%;background:var(--c);color:#fff;font:600 12px/24px var(--body);text-align:center;font-variant-numeric:tabular-nums}
 .dot.plain{background:var(--line)}
 .nowline > span:not(.dot){flex:1;min-width:0;overflow-wrap:anywhere}
+.nowtext{cursor:text}
+.nowform{flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:6px}
+.nowform input{flex:1 1 100%;min-width:0;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-family:var(--body)}
 .nowline .x{flex:none;border:0;background:none;color:var(--muted);cursor:pointer;width:34px;height:30px;border-radius:50%;font-size:20px;line-height:1}
 .nowline .x:hover{background:var(--sunk);color:var(--accent)}
 .nowactions{display:flex;gap:8px;flex-wrap:wrap}
@@ -592,6 +597,7 @@ function renderSheet(){
   el.innerHTML = h; el.hidden = false;
   const inp = document.getElementById("g-input"); if(inp){ inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
 }
+let nowEdit = null;
 function renderNow(){
   const body = document.getElementById("now-body"), now = new Date(), evs = S.events.items || [];
   const rows = nowItems().map((i, n) => {
@@ -602,7 +608,9 @@ function renderNow(){
   if(!rows.length){ body.innerHTML = '<div class="nowlist"><div class="nowline"><span style="color:var(--muted)">Nothing here yet. Tap 💡 on an event and + the steps you want.</span></div></div>'; return; }
   body.innerHTML = '<div class="nowlist">'+rows.map(({i, e, days, color}) =>
     '<div class="nowline">'+(e ? '<span class="dot" style="--c:'+color+'" title="'+esc(e.name)+': '+days+' day'+(days === 1 ? '' : 's')+' left">'+days+'</span>' : '<span class="dot plain" title="Checklist"></span>')+
-    '<span>'+esc(i.text)+'</span><button class="x" type="button" data-nowdone="'+esc(i.id)+'" aria-label="Done: '+esc(i.text)+'">×</button></div>').join("")+'</div>';
+    (nowEdit === i.id
+      ? '<form class="nowform" data-nowedit="'+esc(i.id)+'"><input id="now-input" value="'+esc(i.text)+'" autocomplete="off" maxlength="160"><button class="btn small" type="submit">Save</button><button class="btn ghost small" type="button" data-nowcancel="1">Cancel</button></form>'
+      : '<span class="nowtext" data-nowtext="'+esc(i.id)+'">'+esc(i.text)+'</span>')+'<button class="x" type="button" data-nowdone="'+esc(i.id)+'" aria-label="Done: '+esc(i.text)+'">×</button></div>').join("")+'</div>';
 }
 function showNowView(on){
   document.getElementById("main-view").hidden = on; document.getElementById("now-view").hidden = !on;
@@ -616,6 +624,7 @@ document.addEventListener("click", ev => {
   const b = ev.target.closest("button"); if(!b) return;
   if(b.id === "open-now"){ showNowView(document.getElementById("now-view").hidden); return; }
   if(b.dataset.guide){ openSheet(b.dataset.guide); return; }
+  if(b.dataset.nowcancel){ nowEdit = null; renderNow(); return; }
   if(b.dataset.nowdone){ S.nowlist = {items: nowItems().filter(i => i.id !== b.dataset.nowdone)}; save("nowlist"); renderNow(); return; }
   if(!sheetFor) return;
   const c = sheetCtx();
@@ -645,6 +654,18 @@ document.addEventListener("submit", ev => {
   gEdit = null; gAdding = false; renderSheet();
 }, true);
 document.addEventListener("keydown", ev => { if(ev.key === "Escape" && sheetFor) closeSheet(); });
+document.addEventListener("click", ev => {
+  const t = ev.target.closest("[data-nowtext]"); if(!t) return;
+  nowEdit = t.dataset.nowtext; renderNow();
+  const inp = document.getElementById("now-input"); if(inp){ inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+});
+document.addEventListener("submit", ev => {
+  const f = ev.target; if(!f.dataset.nowedit) return;
+  ev.preventDefault(); ev.stopImmediatePropagation();
+  const text = document.getElementById("now-input").value.trim();
+  S.nowlist = {items: text ? nowItems().map(i => i.id === f.dataset.nowedit ? {...i, text} : i) : nowItems().filter(i => i.id !== f.dataset.nowedit)};
+  save("nowlist"); nowEdit = null; renderNow();
+}, true);
 
 const STAR = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"/></svg>';
 function evRow(e, now, mode){
@@ -664,7 +685,7 @@ function evRow(e, now, mode){
     : '<button class="note" type="button" data-note-edit="'+esc(e.id)+'" data-idx="'+i+'" aria-label="Edit note">'+esc(t)+'</button>').join("");
   if(ed) noteHtml += noteForm(e.id, -1, "");
   const name = (isNew(e) ? '<span class="new">New</span>' : '')+(e.link ? '<a href="'+esc(e.link)+'" target="_blank" rel="noopener">'+esc(e.name)+'</a>' : esc(e.name));
-  const acts = '<div class="acts"><button class="bulb'+(nowItems().some(i => i.ev === e.id) ? ' has' : '')+'" type="button" data-guide="'+esc(e.id)+'" aria-label="Game plan for '+esc(e.name)+'" title="Game plan">'+BULB+'</button><button class="pen" type="button" data-note-edit="'+esc(e.id)+'" data-idx="-1" aria-pressed="'+ed+'" aria-label="Add a note to '+esc(e.name)+'" title="Add a note">'+PEN+'</button>'+
+  const acts = '<div class="acts"><button class="bulb'+(nowItems().some(i => i.ev === e.id) ? ' has' : '')+'" type="button" data-guide="'+esc(e.id)+'" aria-label="Game plan for '+esc(e.name)+'" title="Game plan">'+BULB+'</button>'+
     '<button class="star" type="button" data-star="'+esc(e.id)+'" aria-pressed="'+starred+'" aria-label="'+(starred?'Remove star from ':'Star ')+esc(e.name)+'" title="'+(starred?'Remove star':'Star')+'">'+STAR+'</button>'+
     '<button class="hide" type="button" data-hide="'+esc(e.id)+'"'+(starred && !hid ? ' disabled' : '')+' aria-label="'+(hid?'Bring back ':'Pass on ')+esc(e.name)+'" title="'+(hid?'Bring back':starred?'Remove the star first to pass on this event':'Pass on this event')+'">'+(hid?'↺':'×')+'</button></div>';
   const meta = '<div class="meta"><a class="chip" href="'+esc(e.link || "https://leekduck.com/events/")+'" target="_blank" rel="noopener">'+esc(label)+'</a>'+cpHtml(e)+when+'</div>';
@@ -731,10 +752,19 @@ function currentChecks(){
 }
 function renderLists(){
 }
+function alignNow(){
+  const btn = document.getElementById("open-now"), fav = document.querySelector('[data-now="star"]');
+  if(!btn || !fav || !fav.offsetWidth) return;
+  const f = fav.getBoundingClientRect(), hd = btn.parentElement.getBoundingClientRect();
+  btn.style.right = "auto";
+  btn.style.left = Math.min(hd.width - btn.offsetWidth, f.left + f.width / 2 - hd.left - btn.offsetWidth / 2)+"px";
+}
+window.addEventListener("resize", alignNow);
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(alignNow);
 function render(){
   nowCount();
   document.getElementById("today-label").textContent = new Date().toLocaleDateString([], {weekday:"short", day:"numeric", month:"short"});
-  renderEvents(); renderLists();
+  renderEvents(); renderLists(); alignNow();
 }
 
 /* ---------- interactions ---------- */
@@ -812,6 +842,14 @@ document.addEventListener("submit", ev => {
 for(const k of DOCS){ const v = lsGet(k); if(v) S[k] = v; }
 // Older saves could have an event both starred and passed; the star wins.
 if(S.prefs.starred.some(id => hiddenList().includes(id))){ S.prefs = {...S.prefs, hidden: hiddenList().filter(id => !S.prefs.starred.includes(id))}; save("prefs"); }
+// Older versions saved bonus lines as "Bonus: …" or "Use a … (bonus: …)"; shorten them to the new style.
+if(nowItems().some(i => /^Bonus: |\(bonus: .+\)$/.test(i.text))){
+  S.nowlist = {items: nowItems().map(i => {
+    const m = /^Bonus: (.+)$/.exec(i.text) || /\(bonus: (.+)\)$/.exec(i.text);
+    return m ? {...i, text: tipForBonus(m[1])} : i;
+  })};
+  save("nowlist");
+}
 forgetFinished();
 loadStats();
 ensureSeen();
