@@ -1,0 +1,847 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Pops Go Beta</title>
+<meta name="description" content="Pokémon GO events, checklists and goals.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Pops Go β">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f3f6f9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f161d" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Rubik:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#f3f6f9; --surface:#ffffff; --sunk:#e8eef4; --note:#f1f3f5; --ink:#15212c; --muted:#5d6b78; --line:#d6dee6;
+  --accent:#e2433a; --accent-ink:#ffffff; --ok:#1f9d6b;
+  --t-red:#d93b33; --t-purple:#7b4ddb; --t-amber:#c98a00; --t-green:#1f9d6b; --t-pink:#b62fc9; --t-blue:#2d6cdf; --t-grey:#6b7785;
+  --display:"Fredoka","Rubik",ui-rounded,system-ui,sans-serif;
+  --body:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#0f161d; --surface:#18222c; --sunk:#111a22; --note:#222d38; --ink:#e7eef5; --muted:#93a3b2; --line:#2a3743;
+  --accent:#ff5c52; --accent-ink:#1a0c0b; --ok:#3cc98e;
+  --t-red:#ff6a61; --t-purple:#a98bff; --t-amber:#f0b63a; --t-green:#3cc98e; --t-pink:#e17cf2; --t-blue:#6fa0ff; --t-grey:#98a5b2;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0f161d; --surface:#18222c; --sunk:#111a22; --note:#222d38; --ink:#e7eef5; --muted:#93a3b2; --line:#2a3743;
+  --accent:#ff5c52; --accent-ink:#1a0c0b; --ok:#3cc98e;
+  --t-red:#ff6a61; --t-purple:#a98bff; --t-amber:#f0b63a; --t-green:#3cc98e; --t-pink:#e17cf2; --t-blue:#6fa0ff; --t-grey:#98a5b2;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+html,body{overflow-x:hidden;overscroll-behavior-x:none;max-width:100%}
+body,button,a,label,input{touch-action:manipulation}
+input,textarea,select{font-size:16px!important}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 var(--body);margin:0}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:calc(env(safe-area-inset-top,0px) + 18px) calc(env(safe-area-inset-bottom,0px) + 48px);display:flex;flex-direction:column;gap:22px}
+h1,h2{font-family:var(--display);font-weight:600;margin:0;text-wrap:balance}
+h1{font-size:30px;letter-spacing:.2px}
+h2{font-size:19px}
+button{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header{display:flex;align-items:center;gap:16px}
+.logo{width:44px;height:44px;flex:none}
+header .who{flex:1;min-width:0}
+header .date{color:var(--muted);font-size:13.5px}
+.beta{display:inline-block;vertical-align:6px;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--sunk);color:var(--muted);font:600 11px/1.5 var(--body);letter-spacing:.6px;text-transform:uppercase}
+.nowbtn{display:inline-flex;align-items:center;gap:7px;flex:none;padding:8px 14px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 15px var(--display);cursor:pointer}
+.nowbtn .count{min-width:20px;padding:0 6px;border-radius:999px;background:var(--surface);color:var(--accent);font:600 12px/20px var(--body);text-align:center}
+.bulb{border:0;background:none;cursor:pointer;width:32px;height:36px;display:grid;place-items:center;border-radius:50%;color:var(--muted)}
+.bulb svg{width:18px;height:18px}
+.bulb:hover{background:var(--sunk);color:var(--ink)}
+.bulb.has{color:#e0a800}
+/* Now list: plain text on white */
+.nowhead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.nowlist{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px 0}
+.nowgroup{padding:8px 14px 4px;font:600 12px var(--body);letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
+.nowgroup + .nowline{border-top:0}
+.nowline{display:flex;align-items:flex-start;gap:8px;padding:9px 6px 9px 14px;border-top:1px solid var(--line);font-size:16px;line-height:1.4}
+.nowline span{flex:1;min-width:0;overflow-wrap:anywhere}
+.nowline .x{flex:none;border:0;background:none;color:var(--muted);cursor:pointer;width:34px;height:30px;border-radius:50%;font-size:20px;line-height:1}
+.nowline .x:hover{background:var(--sunk);color:var(--accent)}
+.nowactions{display:flex;gap:8px;flex-wrap:wrap}
+/* guide sheet */
+.sheet-bg{position:fixed;inset:0;z-index:20;background:rgb(0 0 0 / .35);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:640px;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bg);border-radius:18px 18px 0 0;padding:16px 16px calc(env(safe-area-inset-bottom,0px) + 20px);display:flex;flex-direction:column;gap:12px}
+.sheet h2{font-size:19px}
+.sheet .sub{color:var(--muted);font-size:13px;margin-top:2px}
+.sheet-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.gcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px 0}
+.gtitle{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px 4px 14px;font:600 12px var(--body);letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
+.gline{display:flex;align-items:center;gap:4px;padding:6px 6px 6px 14px;border-top:1px solid var(--line);font-size:15px;line-height:1.4}
+.gtitle + .gline{border-top:0}
+.gline > span{flex:1;min-width:0;overflow-wrap:anywhere}
+.gbtn{flex:none;border:0;background:none;cursor:pointer;width:34px;height:34px;border-radius:50%;color:var(--muted);font-size:18px;line-height:1;display:grid;place-items:center}
+.gbtn:hover{background:var(--sunk);color:var(--ink)}
+.gbtn.add{color:var(--ok);font-size:24px}
+.gbtn.added{color:var(--ok);font-size:17px;cursor:default}
+.gbtn svg{width:16px;height:16px}
+.gform{display:flex;gap:6px;flex-wrap:wrap;padding:8px 10px 8px 14px;border-top:1px solid var(--line)}
+.gform input{flex:1 1 100%;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-family:var(--body)}
+.gfoot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 10px 6px 14px;border-top:1px solid var(--line)}
+
+.section{display:flex;flex-direction:column;gap:10px}
+.sechead{display:flex;align-items:center;gap:8px;justify-content:space-between;flex-wrap:wrap}
+.sechead h2{font-size:18px;white-space:nowrap}
+.sechead .sub{color:var(--muted);font-size:13px}
+.section > .sub{color:var(--muted);font-size:13px;margin-top:-4px}
+.tabs{display:flex;gap:2px;background:var(--sunk);padding:3px;border-radius:999px}
+.tabs button{border:0;background:none;padding:5px 10px;border-radius:999px;font-size:13px;cursor:pointer;color:var(--muted)}
+.tabs button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:500;box-shadow:0 1px 2px rgb(0 0 0 / .12)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.evlist{display:flex;flex-direction:column;gap:8px}
+.ev{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 12px;align-items:center;padding:9px 11px 9px 13px;background:var(--surface);border:2px solid var(--c);border-radius:14px}
+.ev .main{min-width:0}
+.ev .meta{grid-column:1 / 3}
+.ev .name{font-weight:500;overflow-wrap:anywhere}
+.ev .name a{text-decoration:none}
+.ev .name a:hover{text-decoration:underline}
+.ev .meta{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;font-size:12.5px;color:var(--muted);margin-top:2px}
+.chip{display:inline-block;padding:4px 11px;border-radius:999px;font-size:12.5px;font-weight:600;letter-spacing:.2px;color:#fff;background:var(--c);text-decoration:none;line-height:1.3}
+.chip:active{filter:brightness(.9)}
+.when{font-variant-numeric:tabular-nums}
+.cp{font-variant-numeric:tabular-nums;color:var(--ink);font-weight:500;white-space:nowrap}
+.cp b{font-weight:600}
+.soon{color:var(--accent);font-weight:500}
+.new{display:inline-block;vertical-align:2px;margin-right:6px;padding:1px 7px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 10.5px/1.5 var(--body);letter-spacing:.6px;text-transform:uppercase}
+.star{border:0;background:none;cursor:pointer;width:36px;height:36px;display:grid;place-items:center;border-radius:50%;color:var(--line)}
+.star svg{width:20px;height:20px}
+.star[aria-pressed="true"]{color:#f2b705}
+.acts{display:flex;align-items:center}
+.hide{border:0;background:none;cursor:pointer;width:32px;height:36px;display:grid;place-items:center;border-radius:50%;color:var(--muted);font-size:18px;line-height:1}
+.hide:hover{background:var(--sunk);color:var(--accent)}
+.hide:disabled{opacity:.25;cursor:default;background:none}
+.pen{border:0;background:none;cursor:pointer;width:32px;height:36px;display:grid;place-items:center;border-radius:50%;color:var(--muted)}
+.pen svg{width:17px;height:17px}
+.pen:hover,.pen[aria-pressed="true"]{background:var(--sunk);color:var(--ink)}
+.note{display:block;width:100%;padding:2px 0;border:0;border-radius:0;background:none;color:var(--ink);font:500 15px/1.45 var(--body);text-align:left;cursor:pointer;overflow-wrap:anywhere;max-width:100%}
+.noteform{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:2px 0}
+.noteform input{flex:1 1 100%;min-width:0;padding:7px 10px;border:1px solid var(--c);border-radius:8px;background:var(--bg);color:var(--ink);font-family:var(--body)}
+.noteform .btn{padding:6px 12px}
+.extra{grid-column:1 / 3;display:flex;flex-direction:column;gap:6px;margin-top:8px;min-width:0}
+.research{border-radius:10px;background:var(--surface);border:1px solid var(--line)}
+.rshow{margin:0 6px 6px}
+
+.ev .acts{align-self:start}
+.research summary{cursor:pointer;padding:7px 10px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.research ul{list-style:none;margin:0;padding:0 4px 4px}
+.rtask{display:flex;gap:6px;align-items:flex-start;padding:7px 6px;border-top:1px solid var(--line)}
+.rt-body{flex:1;min-width:0}
+.rt-text{font-size:13.5px;font-weight:500;overflow-wrap:anywhere}
+.rt-rew{display:flex;flex-wrap:wrap;gap:2px 10px;font-size:12px;color:var(--muted);margin-top:3px}
+.rw{display:inline-flex;align-items:center;gap:3px}
+.rw img{width:20px;height:20px;object-fit:contain}
+.rt-x{border:0;background:none;color:var(--muted);cursor:pointer;width:30px;height:30px;border-radius:50%;font-size:17px;line-height:1;flex:none}
+.rt-x:hover{background:var(--sunk);color:var(--accent)}
+.rtask.crossed .rt-body{opacity:.45;text-decoration:line-through}
+.ev.is-hidden .main{opacity:.5}
+.star:hover{background:var(--sunk)}
+.dayhead{font:600 12px var(--body);letter-spacing:.8px;text-transform:uppercase;color:var(--muted);padding:8px 4px 0}
+.dayhead:first-child{padding-top:0}
+.dayhead.today{color:var(--accent)}
+.empty{padding:14px;color:var(--muted);font-size:14px}
+.evlist > .empty{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+@media (max-width:620px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.update input{width:100%;min-width:0;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-family:var(--body)}
+.update p{margin:0;font-size:14px}
+.update li{margin-block:3px}
+.list{padding:6px 0}
+.task{display:flex;align-items:center;gap:10px;padding:7px 14px}
+.task label{flex:1;display:flex;gap:10px;align-items:center;cursor:pointer;min-width:0}
+.task input[type=checkbox]{appearance:none;width:22px;height:22px;flex:none;border:2px solid var(--line);border-radius:50%;display:grid;place-items:center;cursor:pointer;margin:0;background:var(--surface)}
+.task input[type=checkbox]:checked{background:var(--ok);border-color:var(--ok)}
+.task input[type=checkbox]:checked::after{content:"";width:6px;height:11px;border:solid var(--surface);border-width:0 2.5px 2.5px 0;transform:translateY(-1px) rotate(45deg)}
+.task input:checked + span{color:var(--muted);text-decoration:line-through}
+.task span{overflow-wrap:anywhere}
+.del{border:0;background:none;color:var(--muted);cursor:pointer;width:28px;height:28px;border-radius:50%;font-size:18px;line-height:1}
+.del:hover{background:var(--sunk);color:var(--accent)}
+.cardhead{display:flex;justify-content:space-between;align-items:center;padding:12px 14px 2px;gap:8px}
+.cardhead h3{margin:0;font:600 15px var(--display)}
+.cardhead .count{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.linkbtn{border:0;background:none;color:var(--muted);font-size:12.5px;cursor:pointer;padding:4px 6px;border-radius:6px;text-decoration:underline;text-underline-offset:2px}
+.linkbtn:hover{color:var(--ink)}
+.addrow{display:flex;gap:8px;padding:6px 14px 12px}
+.addrow input{flex:1;min-width:0;font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.btn{border:0;border-radius:8px;padding:7px 14px;font-weight:500;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:var(--sunk);color:var(--ink)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.small{padding:4px 12px;font-size:13px}
+.hgroup{display:flex;align-items:center;gap:10px}
+.tucked{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;color:var(--muted);font-size:14px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+
+.update{padding:14px;display:flex;flex-direction:column;gap:10px}
+.update ol{margin:0;padding-left:20px;color:var(--muted);font-size:13.5px}
+.update textarea{width:100%;min-height:110px;font:13px/1.4 var(--body);padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);resize:vertical}
+.update .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.status{font-size:13px;color:var(--muted)}
+.status.err{color:var(--accent)}
+footer{color:var(--muted);font-size:12.5px;text-align:center}
+.refresh{display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <svg class="logo" viewBox="0 0 44 44" aria-hidden="true">
+      <circle cx="22" cy="22" r="20" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
+      <path d="M2 22a20 20 0 0 1 40 0z" fill="var(--accent)" stroke="var(--ink)" stroke-width="3"/>
+      <circle cx="22" cy="22" r="6" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
+    </svg>
+    <div class="who">
+      <h1>Pops Go<span class="beta">beta</span></h1>
+      <div class="date" id="today-label"></div>
+    </div>
+    <button class="nowbtn" type="button" id="open-now" aria-label="Open my Now list">Now <span class="count" id="now-count">0</span></button>
+  </header>
+
+  <div id="main-view">
+
+  <section class="section">
+    <div class="sechead">
+      <h2>Happening Now</h2>
+      <div class="tabs" role="group" aria-label="Which events happening now to show">
+        <button type="button" data-now="all" aria-pressed="true">Show</button>
+        <button type="button" data-now="star" aria-pressed="false">Faves</button>
+        <button type="button" data-now="hidden" aria-pressed="false">Pass</button>
+      </div>
+    </div>
+    <div class="evlist" id="now"></div>
+  </section>
+
+  <section class="section" style="margin-top:22px">
+    <div class="sechead">
+      <h2>Upcoming Events</h2>
+      <div class="tabs" role="group" aria-label="Which upcoming events to show">
+        <button type="button" data-up="all" aria-pressed="true">Show</button>
+        <button type="button" data-up="star" aria-pressed="false">Faves</button>
+        <button type="button" data-up="hidden" aria-pressed="false">Pass</button>
+      </div>
+    </div>
+    <div class="tucked" id="up-summary"><span id="up-count"></span><button class="btn ghost small" type="button" id="up-open">Show</button></div>
+    <div class="evlist" id="upcoming"></div>
+  </section>
+
+  <footer class="refresh">
+    <span id="ev-updated">Loading events from Leek Duck…</span>
+    <button class="linkbtn" type="button" id="refresh-btn">Refresh now</button>
+  </footer>
+  <footer>Event data from <a href="https://leekduck.com/events/" target="_blank" rel="noopener">Leek Duck</a>. Tap an event name to open its page.</footer>
+  </div>
+
+  <section class="section" id="now-view" hidden>
+    <div class="nowhead"><h2>Now</h2><button class="btn ghost" type="button" id="close-now">Back to events</button></div>
+    <div id="now-body"></div>
+    <div class="nowactions">
+      <button class="btn ghost" type="button" data-guide="outing">💡 Every outing guides</button>
+    </div>
+  </section>
+</div>
+<div class="sheet-bg" id="sheet" hidden></div>
+
+<script>
+const DAYS_AHEAD = 14; // fetch, show and check research for events starting within this many days
+const FEED = "https://raw.githubusercontent.com/bigfoott/ScrapedDuck/data/events.min.json";
+const DEFAULTS = {
+  events: {items:[]},
+  prefs: {"hidden": ["max-mondays-2026-09-28", "go-pass-september-2026", "mega-malamar-in-mega-raids-september-2026", "xurkitree-pheromosa-buzzwole-in-5-star-raid-battles-september-2026", "gbl-twilight-trails_ultra-league_master-league-mega-edition_retro-cup-great-league-edition", "lego-pokemon-go-2026", "pokemon-tcg-30th-celebration", "season-24-twilight-trails", "pokemon-x-adidas-2026"], "starred": ["october-communityday2026", "raidhour20260930", "pokemonspotlighthour2026-10-01"]},
+  tasks: {
+    daily:[
+      {id:"d1",label:"Spin a PokéStop"},
+      {id:"d2",label:"Catch a Pokémon"},
+      {id:"d3",label:"Open gifts and send gifts"},
+      {id:"d4",label:"Use the free Raid Pass"},
+      {id:"d5",label:"Do Field Research for the day's stamp"},
+      {id:"d6",label:"Check eggs and incubators"}
+    ],
+    weekly:[
+      {id:"w1",label:"Read this week's events"},
+      {id:"w2",label:"Star the events I want"},
+      {id:"w3",label:"Claim the Research Breakthrough"},
+      {id:"w4",label:"Tidy bag and Pokémon storage"}
+    ]
+  },
+  checks: {day:"",daily:{},week:"",weekly:{}},
+  notes: {items:{}},
+  crossed: {items:{}},
+  guides: {groups:{}},
+  nowlist: {items:[]},
+  goals: {items:[
+    {id:"g1",label:"Stock up on Stardust and Poké Balls for Zorua Community Day (Sat 10 Oct)"},
+    {id:"g2",label:"Raid Xerneas while it's in 5-star raids (until Tue 6 Oct)"}
+  ]}
+};
+const DOCS = ["events","prefs","tasks","checks","goals","notes","crossed","seen","guides","nowlist"];
+const S = JSON.parse(JSON.stringify(DEFAULTS));
+let nowMode = ["all","star","hidden"].includes(lsGet("nowMode")) ? lsGet("nowMode") : "all",
+    upMode = ["all","star","hidden"].includes(lsGet("upFilter")) ? lsGet("upFilter") : (lsGet("upMode") === "hidden" ? "hidden" : "all"),
+    upOpen = typeof lsGet("upOpen") === "boolean" ? lsGet("upOpen") : !(lsGet("upMode") === "hide" || lsGet("upHidden") === true), editing = {daily:false,weekly:false,goals:false}, pending = null;
+
+const TYPES = { // colours match Leek Duck's event badges
+  "community-day":["Community Day","#1660a9"], "raid-day":["Raid Day","#e74c3c"],
+  "raid-hour":["Raid Hour","#c0392b"], "raid-battles":["Raid Battles","#c0392b"], "raid-weekend":["Raid Weekend","#c0392b"], "elite-raids":["Elite Raids","#c0392b"],
+  "pokemon-spotlight-hour":["Spotlight Hour","#e58e26"],
+  "event":["Event","#27ae60"], "hatch-day":["Hatch Day","#27ae60"], "choose-your-path":["Choose Your Path","#16a085"],
+  "research":["Research","#1abc9c"], "research-day":["Research Day","#1abc9c"],
+  "max-battles":["Max Battles","#811356"], "max-mondays":["Max Mondays","#690342"],
+  "go-battle-league":["GO Battle League","#8e44ad"], "go-pass":["GO Pass","#ddb22f"], "season":["Season","#38ada9"],
+  "wild-area":["Wild Area","#015b63"], "pokemon-go-tour":["GO Tour","#1d3a74"]
+};
+const typeOf = e => TYPES[e.type] || [e.heading || "Event", "#6b7785"];
+
+/* ---------- storage ---------- */
+function lsGet(k){ try{ const v = localStorage.getItem("popsgo:"+k); return v ? JSON.parse(v) : null; }catch{ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem("popsgo:"+k, JSON.stringify(v)); }catch{} }
+function save(id){
+  lsSet(id, S[id]);
+}
+
+/* ---------- time helpers ---------- */
+const pad = n => String(n).padStart(2,"0");
+const dayKey = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+function weekKey(d){ const m = new Date(d); m.setHours(0,0,0,0); m.setDate(m.getDate() - ((m.getDay()+6)%7)); return dayKey(m); }
+const fmtTime = d => d.toLocaleTimeString([], {hour:"numeric", minute:"2-digit"});
+const fmtDay = d => d.toLocaleDateString([], {weekday:"short", day:"numeric", month:"short"});
+function span(ms){
+  const m = Math.max(0, Math.round(ms/60000)), d = Math.floor(m/1440), h = Math.floor(m%1440/60), mm = m%60;
+  if(d) return d+"d "+h+"h"; if(h) return h+"h "+mm+"m"; return mm+"m";
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------- render ---------- */
+const PEN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
+let noteEditing = null; // {id, idx}; idx -1 means a new note
+function notesOf(id){ const v = S.notes && S.notes.items && S.notes.items[id]; return Array.isArray(v) ? v : v ? [v] : []; }
+function setNotes(id, list){
+  const items = {...((S.notes && S.notes.items) || {})};
+  if(list.length) items[id] = list; else delete items[id];
+  S.notes = {items}; save("notes");
+}
+function noteForm(id, idx, text){
+  return '<form class="noteform" data-note-form="'+esc(id)+'" data-idx="'+idx+'"><input id="note-input" value="'+esc(text)+'" placeholder="'+(idx < 0 ? "Add a note" : "Edit note")+'" autocomplete="off" maxlength="200">'+
+    '<button class="btn" type="submit">Save</button><button class="btn ghost" type="button" data-note-cancel="1">Cancel</button>'+
+    (idx >= 0 ? '<button class="linkbtn" type="button" data-note-del="1">Delete</button>' : '')+'</form>';
+}
+
+/* field research from each event's Leek Duck page */
+const R_VER = 4;
+let R = lsGet("research") || {}, rOpen = lsGet("ropen") || {}, rShow = {};
+const crossedOf = id => (S.crossed && S.crossed.items && S.crossed.items[id]) || [];
+const rwHtml = list => list.map(w => '<span class="rw">'+(w.img ? '<img src="'+esc(w.img)+'" alt="" loading="lazy">' : '')+esc(w.n)+'</span>').join("");
+const xBtn = (id, key, label, isHidden) => '<button class="rt-x" type="button" data-cross="'+esc(id)+'" data-task="'+esc(key)+'" aria-label="'+(isHidden ? 'Show ' : 'Hide ')+esc(label)+'" title="'+(isHidden ? 'Show again' : 'Hide')+'">'+(isHidden ? '↺' : '×')+'</button>';
+function panel(id, kind, title, total, hiddenN, body){
+  const key = id+":"+kind, showing = rShow[key];
+  const sub = hiddenN ? ' · '+hiddenN+' hidden' : '';
+  return '<details class="research" data-rid="'+esc(key)+'"'+(rOpen[key] === false ? '' : ' open')+'><summary>'+title+' · '+(total - hiddenN)+' '+"task"+(total - hiddenN === 1 ? '' : 's')+sub+'</summary><ul>'+body+'</ul>'+
+    (hiddenN ? '<button class="linkbtn rshow" type="button" data-rshow="'+esc(key)+'">'+(showing ? 'Hide the hidden ones again' : 'Show '+hiddenN+' hidden')+'</button>' : '')+'</details>';
+}
+function researchHtml(e){
+  const r = R[e.id]; if(!r) return "";
+  const x = crossedOf(e.id), out = [];
+  const field = r.tasks || [];
+  if(field.length){
+    const show = rShow[e.id+":f"], hiddenN = field.filter(t => x.includes(t.t)).length;
+    const body = field.filter(t => show || !x.includes(t.t)).map(t => {
+      const h = x.includes(t.t);
+      return '<li class="rtask'+(h ? ' crossed' : '')+'"><div class="rt-body"><div class="rt-text">'+esc(t.t)+'</div><div class="rt-rew">'+rwHtml(t.rw)+'</div></div>'+xBtn(e.id, t.t, t.t, h)+'</li>';
+    }).join("");
+    out.push(panel(e.id, "f", "Field research", field.length, hiddenN, body));
+  }
+  return out.join("");
+}
+function parseResearch(html){
+  const doc = new DOMParser().parseFromString(html, "text/html"), clean = s => (s || "").replace(/‑/g, "-").replace(/\s+/g, " ").trim();
+  const img = el => el ? el.getAttribute("src") || "" : "";
+  const itemName = (label, src) => /^×/.test(label) && /\/items\//.test(src) ? decodeURIComponent(src.split("/").pop().replace(/\.\w+$/, ""))+" "+label : label;
+  const tasks = [...doc.querySelectorAll("ul.event-field-research-list > li")].map(li => ({
+    t: clean(li.querySelector(".task")?.textContent),
+    rw: [...li.querySelectorAll(".reward")].map(w => ({ n: clean(w.querySelector(".reward-label")?.textContent), img: img(w.querySelector("img.reward-image")) }))
+  })).filter(x => x.t);
+  const bonuses = [], h = doc.getElementById("bonuses");
+  for(let el = h && h.nextElementSibling; el && !/^H[23]$/.test(el.tagName); el = el.nextElementSibling)
+    for(const b of el.querySelectorAll(".bonus-text")){ const t = clean(b.textContent); if(t) bonuses.push(t); }
+  return {tasks, bonuses};
+}
+const R_TYPES = new Set(["raid-day","event","community-day","research","research-day","hatch-day","choose-your-path","max-battles","wild-area","pokemon-go-tour","city-safari","season"]);
+let rLoading = false;
+async function loadResearch(){
+  if(rLoading) return; rLoading = true;
+  const now = new Date(), horizon = +now + DAYS_AHEAD*864e5, hl = hiddenList(), items = S.events.items || [];
+  const want = items.filter(e => R_TYPES.has(e.type) && e.link && !hl.includes(e.id) && new Date(e.end) > now && new Date(e.start) < horizon
+    && !(R[e.id] && R[e.id].v === R_VER && Date.now() - R[e.id].at < 12*3600e3));
+  for(const e of want){
+    try{
+      const res = await fetch(e.link);
+      if(!res.ok) continue;
+      R[e.id] = {v: R_VER, at: Date.now(), ...parseResearch(await res.text())};
+      lsSet("research", R);
+      if(R[e.id].tasks.length) renderEvents();
+    }catch{}
+  }
+  for(const id of Object.keys(R)) if(!items.some(e => e.id === id)) delete R[id];
+  lsSet("research", R); rLoading = false;
+}
+document.addEventListener("toggle", ev => {
+  const d = ev.target; if(!d.dataset || !d.dataset.rid) return;
+  rOpen[d.dataset.rid] = d.open; lsSet("ropen", rOpen);
+}, true);
+/* "New" tags: an event is new until it's starred, hidden, noted or marked as seen */
+const seenIds = () => (S.seen && S.seen.ids) || [];
+const isNew = e => !!S.seen && !seenIds().includes(e.id);
+function markSeen(ids){
+  if(!S.seen) return;
+  const cur = seenIds(), add = ids.filter(i => !cur.includes(i));
+  if(!add.length) return;
+  const live = new Set((S.events.items || []).map(e => e.id));
+  S.seen = {ids: cur.filter(i => live.has(i)).concat(add)};
+  save("seen");
+}
+function forgetFinished(){
+  // Stars, hidden flags, notes and hidden research go once an event has ended.
+  const now = new Date(), gone = new Set((S.events.items || []).filter(e => new Date(e.end) <= now).map(e => e.id));
+  if(!gone.size) return;
+  const keep = ids => (ids || []).filter(i => !gone.has(i));
+  S.prefs = {...S.prefs, starred: keep(S.prefs.starred), hidden: keep(S.prefs.hidden)};
+  const notes = {...((S.notes && S.notes.items) || {})}, crossed = {...((S.crossed && S.crossed.items) || {})};
+  for(const id of gone){ delete notes[id]; delete crossed[id]; }
+  S.notes = {items: notes}; S.crossed = {items: crossed};
+  if(S.seen) S.seen = {ids: keep(S.seen.ids)};
+  if(S.nowlist && S.nowlist.items.some(i => gone.has(i.ev))) S.nowlist = {items: S.nowlist.items.filter(i => !gone.has(i.ev))};
+  for(const k of ["prefs","notes","crossed","seen","nowlist"]) if(S[k]) save(k);
+}
+function ensureSeen(){
+  // First run: everything already listed counts as seen, so only events added later are tagged.
+  if(S.seen || !(S.events.items || []).length) return;
+  S.seen = {ids: S.events.items.map(e => e.id)};
+  save("seen");
+}
+/* hundo CP for raid bosses: level 20 normally, level 25 when weather boosted */
+const STATS_URL = "https://pogoapi.net/api/v1/pokemon_stats.json";
+const RAID_TYPES = new Set(["raid-battles","raid-hour","raid-day","raid-weekend","elite-raids"]);
+let STATS = null;
+(function(){ const c = lsGet("stats"); if(c && Date.now() - c.at < 7*864e5) STATS = c.list; })();
+async function loadStats(){
+  if(STATS) return;
+  try{
+    const list = (await (await fetch(STATS_URL)).json()).map(x => [x.pokemon_name, x.form, x.base_attack, x.base_defense, x.base_stamina]);
+    STATS = list; lsSet("stats", {at: Date.now(), list}); renderEvents();
+  }catch{}
+}
+const REGIONAL = {Alolan: "Alola", Galarian: "Galarian", Hisuian: "Hisuian", Paldean: "Paldea"};
+function bosses(e){
+  let n = e.name.replace(/\s+(in|during)\s+.*$/i, "").replace(/\s+Raid (Hour|Day|Weekend)$/i, "");
+  const out = [], seen = new Set();
+  for(let part of n.split(/,\s*(?:and\s+)?|\s+and\s+/)){
+    part = part.trim(); if(!part) continue;
+    let form = "", m = /\(([^)]+?)(?:\s+Forme?)?\)\s*$/i.exec(part);
+    if(m){ form = m[1]; part = part.slice(0, m.index).trim(); }
+    part = part.replace(/^(Shadow|Mega|Primal|Dynamax|Gigantamax)\s+/i, "").replace(/\s+[XY]$/, "");
+    const reg = /^(Alolan|Galarian|Hisuian|Paldean)\s+/.exec(part);
+    if(reg){ form = REGIONAL[reg[1]]; part = part.slice(reg[0].length); }
+    const key = part+"|"+form; if(seen.has(key)) continue; seen.add(key);
+    out.push({name: part, form});
+  }
+  return out;
+}
+function hundo(b){
+  if(!STATS) return null;
+  const rows = STATS.filter(x => x[0].toLowerCase() === b.name.toLowerCase());
+  if(!rows.length) return null;
+  const f = b.form.toLowerCase();
+  const row = (f && rows.find(x => x[1].toLowerCase().startsWith(f))) || rows.find(x => x[1] === "Normal") || rows[0];
+  const cp = m => Math.max(10, Math.floor((row[2]+15) * Math.sqrt(row[3]+15) * Math.sqrt(row[4]+15) * m * m / 10));
+  return [cp(0.5974), cp(0.667934)];
+}
+function cpHtml(e){
+  if(!RAID_TYPES.has(e.type)) return "";
+  const list = bosses(e).map(b => ({b, cp: hundo(b)})).filter(x => x.cp);
+  return list.map(x => '<span class="cp">'+(list.length > 1 ? esc(x.b.name)+' ' : '')+'💯 <b>'+x.cp[0]+'</b> · ☁️ <b>'+x.cp[1]+'</b></span>').join("");
+}
+/* ---------- game-plan guides (permanent, editable per event type) and the Now list ---------- */
+const GUIDE_GROUPS = {
+  raids:   {label: "Raid guides", types: ["raid-battles","raid-hour","raid-day","raid-weekend","elite-raids"], tips: [
+    "Check you have Raid Passes (a free one daily from spinning a Gym)",
+    "Pick a counter team for the boss (Leek Duck's raid page lists the best counters)",
+    "Mega Evolve a Pokémon that shares a type with the boss for an attack boost and bonus Candy",
+    "Set your buddy first if it has a raid task (e.g. Galarian Yamask)",
+    "Team GO Rocket battles don't count as raids",
+    "Compare the boss CP with 💯 before using your best berries",
+    "Join a Party for Party Play bonuses"]},
+  max:     {label: "Max Battle guides", types: ["max-battles","max-mondays"], tips: [
+    "Use a Star Piece before your first Max Battle",
+    "Collect Max Particles at Power Spots before you start",
+    "Bring your strongest Dynamax team (power up its Max Moves)",
+    "Gigantamax battles need a group, so go with friends"]},
+  cday:    {label: "Community Day guides", types: ["community-day"], tips: [
+    "Check the event's bonuses and use a Star Piece or Lucky Egg to match",
+    "Evolve the featured Pokémon during the event for its exclusive move (check Leek Duck for the window)",
+    "Tap-check every featured Pokémon for a shiny",
+    "Do the event field research for extra encounters"]},
+  spot:    {label: "Spotlight Hour guides", types: ["pokemon-spotlight-hour"], tips: [
+    "Check the bonus (Stardust, XP or Candy) and use a Star Piece or Lucky Egg to match",
+    "Use an Incense to find more of the featured Pokémon"]},
+  gbl:     {label: "GO Battle League guides", types: ["go-battle-league"], tips: [
+    "Check which leagues and cups are running this week",
+    "Pick a team that fits the league's CP limit"]},
+  event:   {label: "Event guides", types: [], tips: [
+    "Read the event's bonuses on Leek Duck",
+    "Check the field research tasks for this event",
+    "Fill your incubators if there's an egg or hatch bonus"]},
+  outing:  {label: "Every outing", types: [], tips: [
+    "Charge your phone and bring a battery pack",
+    "Clear some bag space",
+    "Clear some Pokémon storage",
+    "Check your buddy is the one you want",
+    "Open and send gifts / collect your free Raid Pass"]}
+};
+const groupFor = e => Object.keys(GUIDE_GROUPS).find(k => GUIDE_GROUPS[k].types.includes(e.type)) || "event";
+const gid = () => "g"+Date.now().toString(36)+Math.random().toString(36).slice(2, 6);
+function guidesOf(key){
+  const own = S.guides && S.guides.groups && S.guides.groups[key];
+  return own || GUIDE_GROUPS[key].tips.map((t, i) => ({id: key+"-"+i, text: t}));
+}
+function setGuides(key, list){ S.guides = {groups: {...((S.guides && S.guides.groups) || {}), [key]: list}}; save("guides"); }
+function resetGuides(key){ const g = {...((S.guides && S.guides.groups) || {})}; delete g[key]; S.guides = {groups: g}; save("guides"); }
+function tipForBonus(raw){
+  const b = raw.replace(/\*+/g, "").trim(), t = b.toLowerCase(), say = tip => tip+" (bonus: "+b+")";
+  if(/hatch|\begg/.test(t)) return say("Fill your incubators");
+  if(/trade/.test(t)) return say("Plan trades with friends");
+  if(/transfer candy/.test(t)) return say("Transfer extras for bonus Candy");
+  if(/catch candy/.test(t) && !/xl/.test(t)) return say("Use Pinap Berries for extra Candy");
+  if(/stardust/.test(t) && /catch|×|x stardust|\d+x/.test(t) && !/less stardust/.test(t)) return say("Use a Star Piece");
+  if(/evolution xp|evolve/.test(t)) return say("Lucky Egg, then evolve");
+  if(/\bxp\b/.test(t) && /catch|×|\dx/.test(t)) return say("Use a Lucky Egg");
+  if(/incense/.test(t)) return say("Use an Incense");
+  if(/lure/.test(t)) return say("Put a Lure on a PokéStop");
+  if(/max particle/.test(t)) return say("Collect Max Particles at Power Spots");
+  if(/raid pass/.test(t)) return say("Spin Gyms for extra free Raid Passes");
+  return "Bonus: "+b;
+}
+function bonusesOf(e){
+  const list = (e.bonuses || []).concat((R[e.id] && R[e.id].bonuses) || []);
+  return [...new Set(list)].map(tipForBonus);
+}
+const nowItems = () => (S.nowlist && S.nowlist.items) || [];
+const inNow = (ev, text) => nowItems().some(i => i.ev === ev && i.text === text);
+function addNow(ev, evName, text){
+  if(inNow(ev, text)) return;
+  S.nowlist = {items: nowItems().concat({id: gid(), ev, evName, text})}; save("nowlist");
+}
+function nowCount(){ const n = nowItems().length; document.getElementById("now-count").textContent = n; }
+const BULB = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1.1 2V16h5v-.2c.1-.8.5-1.5 1.1-2A6 6 0 0 0 12 3z"/></svg>';
+const TRASH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg>';
+
+let sheetFor = null, gEdit = null, gAdding = false, gResetAsk = false; // sheetFor = event id or "outing"
+function openSheet(id){ sheetFor = id; gEdit = null; gAdding = false; gResetAsk = false; renderSheet(); document.body.style.overflow = "hidden"; }
+function closeSheet(){ sheetFor = null; document.getElementById("sheet").hidden = true; document.body.style.overflow = ""; }
+function renderSheet(){
+  const el = document.getElementById("sheet");
+  if(!sheetFor){ el.hidden = true; return; }
+  const ev = sheetFor === "outing" ? null : (S.events.items || []).find(e => e.id === sheetFor);
+  if(sheetFor !== "outing" && !ev){ closeSheet(); return; }
+  const key = ev ? groupFor(ev) : "outing", evId = ev ? ev.id : "outing", evName = ev ? ev.name : "Every outing";
+  const guides = guidesOf(key), bonus = ev ? bonusesOf(ev) : [];
+  const addBtn = text => inNow(evId, text)
+    ? '<button class="gbtn added" type="button" disabled aria-label="On your Now list">✓</button>'
+    : '<button class="gbtn add" type="button" data-addnow="'+esc(text)+'" aria-label="Add to Now: '+esc(text)+'">+</button>';
+  let h = '<div class="sheet" role="dialog" aria-modal="true" aria-label="Game plan"><div class="sheet-top"><div><h2>💡 '+esc(evName)+'</h2><div class="sub">Tap + to add a step to your Now list</div></div>'+
+    '<button class="btn ghost small" type="button" data-sheet-close="1">Done</button></div>';
+  h += '<div><button class="btn" type="button" data-addall="1">Add all to Now</button></div>';
+  if(bonus.length){
+    h += '<div class="gcard"><div class="gtitle">From this event\'s bonuses</div>'+bonus.map(t => '<div class="gline"><span>'+esc(t)+'</span>'+addBtn(t)+'</div>').join("")+'</div>';
+  }
+  h += '<div class="gcard"><div class="gtitle"><span>'+esc(GUIDE_GROUPS[key].label)+'</span></div>';
+  for(const g of guides){
+    if(gEdit === g.id){
+      h += '<form class="gform" data-gedit="'+esc(g.id)+'"><input id="g-input" value="'+esc(g.text)+'" autocomplete="off" maxlength="160"><button class="btn" type="submit">Save</button><button class="btn ghost" type="button" data-gcancel="1">Cancel</button></form>';
+    } else {
+      h += '<div class="gline"><span>'+esc(g.text)+'</span>'+addBtn(g.text)+
+        '<button class="gbtn" type="button" data-gedit-open="'+esc(g.id)+'" aria-label="Edit this guide">'+PEN+'</button>'+
+        '<button class="gbtn" type="button" data-gdel="'+esc(g.id)+'" aria-label="Delete this guide">'+TRASH+'</button></div>';
+    }
+  }
+  if(!guides.length) h += '<div class="gline"><span style="color:var(--muted)">No guides yet. Add your own below.</span></div>';
+  h += gAdding
+    ? '<form class="gform" data-gadd="1"><input id="g-input" placeholder="New guide for '+esc(GUIDE_GROUPS[key].label.replace(/ guides$/,""))+'" autocomplete="off" maxlength="160"><button class="btn" type="submit">Add</button><button class="btn ghost" type="button" data-gcancel="1">Cancel</button></form>'
+    : '';
+  h += '<div class="gfoot">'+(gAdding ? '' : '<button class="linkbtn" type="button" data-gadd-open="1">+ Add your own guide</button>')+
+    (gResetAsk ? '<span><b>Reset?</b> <button class="linkbtn" type="button" data-greset="yes">Yes, reset</button> <button class="linkbtn" type="button" data-greset="no">Cancel</button></span>'
+               : '<button class="linkbtn" type="button" data-greset="ask">Reset to starter tips</button>')+'</div></div>';
+  h += '<div class="sub">Changes to guides are kept for every future '+esc(GUIDE_GROUPS[key].label.replace(/ guides$/,"").replace(/^Every outing$/,"outing"))+' event.</div></div>';
+  el.innerHTML = h; el.hidden = false;
+  const inp = document.getElementById("g-input"); if(inp){ inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+}
+function sheetCtx(){
+  const ev = sheetFor === "outing" ? null : (S.events.items || []).find(e => e.id === sheetFor);
+  return {ev, key: ev ? groupFor(ev) : "outing", evId: ev ? ev.id : "outing", evName: ev ? ev.name : "Every outing"};
+}
+function renderNow(){
+  nowCount();
+  const items = nowItems(), body = document.getElementById("now-body");
+  if(!items.length){ body.innerHTML = '<div class="nowlist"><div class="nowline"><span style="color:var(--muted)">Nothing on your Now list yet. Tap 💡 on an event and add the steps you want to remember.</span></div></div>'; return; }
+  const order = [], groups = {};
+  for(const i of items){ if(!groups[i.ev]){ groups[i.ev] = []; order.push(i.ev); } groups[i.ev].push(i); }
+  body.innerHTML = '<div class="nowlist">'+order.map(ev => '<div class="nowgroup">'+esc(groups[ev][0].evName)+'</div>'+
+    groups[ev].map(i => '<div class="nowline"><span>'+esc(i.text)+'</span><button class="x" type="button" data-nowdone="'+esc(i.id)+'" aria-label="Done: '+esc(i.text)+'">×</button></div>').join("")).join("")+'</div>';
+}
+function showNowView(on){
+  document.getElementById("main-view").hidden = on; document.getElementById("now-view").hidden = !on;
+  if(on) renderNow(); window.scrollTo(0, 0);
+}
+document.addEventListener("click", ev => {
+  const bg = document.getElementById("sheet");
+  if(ev.target === bg){ closeSheet(); return; }
+  const b = ev.target.closest("button"); if(!b) return;
+  if(b.id === "open-now"){ showNowView(true); return; }
+  if(b.id === "close-now"){ showNowView(false); renderEvents(); return; }
+  if(b.dataset.guide){ openSheet(b.dataset.guide); return; }
+  if(b.dataset.nowdone){ S.nowlist = {items: nowItems().filter(i => i.id !== b.dataset.nowdone)}; save("nowlist"); renderNow(); return; }
+  if(!sheetFor) return;
+  const c = sheetCtx();
+  if(b.dataset.sheetClose){ closeSheet(); renderEvents(); renderNow(); return; }
+  if(b.dataset.addnow){ addNow(c.evId, c.evName, b.dataset.addnow); markSeen([c.evId]); renderSheet(); nowCount(); return; }
+  if(b.dataset.addall){ for(const t of (c.ev ? bonusesOf(c.ev) : []).concat(guidesOf(c.key).map(g => g.text))) addNow(c.evId, c.evName, t); renderSheet(); nowCount(); return; }
+  if(b.dataset.geditOpen){ gEdit = b.dataset.geditOpen; gAdding = false; renderSheet(); return; }
+  if(b.dataset.gcancel){ gEdit = null; gAdding = false; renderSheet(); return; }
+  if(b.dataset.gdel){ setGuides(c.key, guidesOf(c.key).filter(g => g.id !== b.dataset.gdel)); renderSheet(); return; }
+  if(b.dataset.gaddOpen){ gAdding = true; gEdit = null; renderSheet(); return; }
+  if(b.dataset.greset){ if(b.dataset.greset === "yes"){ resetGuides(c.key); gResetAsk = false; } else gResetAsk = b.dataset.greset === "ask"; renderSheet(); return; }
+});
+document.addEventListener("submit", ev => {
+  const f = ev.target; if(!sheetFor || !(f.dataset.gedit || f.dataset.gadd)) return;
+  ev.preventDefault(); ev.stopImmediatePropagation();
+  const c = sheetCtx(), text = document.getElementById("g-input").value.trim(), list = guidesOf(c.key).slice();
+  if(f.dataset.gedit){ const i = list.findIndex(g => g.id === f.dataset.gedit); if(i >= 0){ if(text) list[i] = {...list[i], text}; else list.splice(i, 1); } }
+  else if(text) list.push({id: gid(), text});
+  setGuides(c.key, list); gEdit = null; gAdding = false; renderSheet();
+}, true);
+document.addEventListener("keydown", ev => { if(ev.key === "Escape" && sheetFor) closeSheet(); });
+
+const STAR = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"/></svg>';
+function evRow(e, now, mode){
+  const [label, color] = typeOf(e), s = new Date(e.start), en = new Date(e.end);
+  const starred = S.prefs.starred.includes(e.id), hid = hiddenList().includes(e.id);
+  let when;
+  if(mode === "now"){
+    const left = en - now;
+    when = '<span class="when'+(left < 3*3600e3 ? ' soon' : '')+'">Ends in '+span(left)+'</span>';
+  } else {
+    const same = dayKey(s) === dayKey(en);
+    when = '<span class="when">'+fmtTime(s)+(same ? '–'+fmtTime(en) : ' → '+fmtDay(en))+'</span>';
+    if(s - now < 3*3600e3) when += ' <span class="soon">starts in '+span(s-now)+'</span>';
+  }
+  const notes = notesOf(e.id), ne = noteEditing && noteEditing.id === e.id ? noteEditing : null, ed = !!(ne && ne.idx === -1);
+  let noteHtml = notes.map((t, i) => ne && ne.idx === i ? noteForm(e.id, i, t)
+    : '<button class="note" type="button" data-note-edit="'+esc(e.id)+'" data-idx="'+i+'" aria-label="Edit note">'+esc(t)+'</button>').join("");
+  if(ed) noteHtml += noteForm(e.id, -1, "");
+  const name = (isNew(e) ? '<span class="new">New</span>' : '')+(e.link ? '<a href="'+esc(e.link)+'" target="_blank" rel="noopener">'+esc(e.name)+'</a>' : esc(e.name));
+  const acts = '<div class="acts"><button class="bulb'+(nowItems().some(i => i.ev === e.id) ? ' has' : '')+'" type="button" data-guide="'+esc(e.id)+'" aria-label="Game plan for '+esc(e.name)+'" title="Game plan">'+BULB+'</button><button class="pen" type="button" data-note-edit="'+esc(e.id)+'" data-idx="-1" aria-pressed="'+ed+'" aria-label="Add a note to '+esc(e.name)+'" title="Add a note">'+PEN+'</button>'+
+    '<button class="star" type="button" data-star="'+esc(e.id)+'" aria-pressed="'+starred+'" aria-label="'+(starred?'Remove star from ':'Star ')+esc(e.name)+'" title="'+(starred?'Remove star':'Star')+'">'+STAR+'</button>'+
+    '<button class="hide" type="button" data-hide="'+esc(e.id)+'"'+(starred && !hid ? ' disabled' : '')+' aria-label="'+(hid?'Bring back ':'Pass on ')+esc(e.name)+'" title="'+(hid?'Bring back':starred?'Remove the star first to pass on this event':'Pass on this event')+'">'+(hid?'↺':'×')+'</button></div>';
+  const meta = '<div class="meta"><a class="chip" href="'+esc(e.link || "https://leekduck.com/events/")+'" target="_blank" rel="noopener">'+esc(label)+'</a>'+cpHtml(e)+when+'</div>';
+  const extra = noteHtml + researchHtml(e);
+  return '<div class="ev'+(hid?' is-hidden':'')+'" style="--c:'+color+'"><div class="main"><div class="name">'+name+'</div></div>'+acts+meta+
+    (extra ? '<div class="extra">'+extra+'</div>' : '')+'</div>';
+}
+const hiddenList = () => S.prefs.hidden || [];
+function renderEvents(){
+  const ni = document.getElementById("note-input"), draft = ni ? ni.value : null, hadFocus = ni && document.activeElement === ni;
+  renderEventLists();
+  const ni2 = document.getElementById("note-input");
+  if(ni2 && draft !== null){ ni2.value = draft; if(hadFocus) ni2.focus(); }
+}
+function renderEventLists(){
+  const now = new Date(), horizon = new Date(+now + DAYS_AHEAD*864e5), hl = hiddenList();
+  const items = (S.events.items || []).filter(e => e.start && e.end), isHid = e => hl.includes(e.id);
+  for(const b of document.querySelectorAll("[data-now]")) b.setAttribute("aria-pressed", b.dataset.now === nowMode);
+  for(const b of document.querySelectorAll("[data-up]")) b.setAttribute("aria-pressed", b.dataset.up === upMode);
+
+  let on = items.filter(e => new Date(e.start) <= now && new Date(e.end) > now).sort((a,b) => new Date(a.end) - new Date(b.end));
+  on = nowMode === "hidden" ? on.filter(isHid) : on.filter(e => !isHid(e));
+  if(nowMode === "star") on = on.filter(e => S.prefs.starred.includes(e.id));
+  const nowEmpty = {all: "Nothing happening right now.", star: "None of your faves are happening now.", hidden: "You haven't passed on anything happening now."}[nowMode];
+  document.getElementById("now").innerHTML = on.length ? on.map(e => evRow(e, now, "now")).join("") : '<div class="empty">'+nowEmpty+'</div>';
+
+  const upAll = items.filter(e => new Date(e.start) > now && new Date(e.start) < horizon).sort((a,b) => new Date(a.start) - new Date(b.start));
+  let up = upMode === "hidden" ? upAll.filter(isHid) : upAll.filter(e => !isHid(e));
+  if(upMode === "star") up = up.filter(e => S.prefs.starred.includes(e.id));
+  const n = up.length, newN = upMode === "hidden" ? 0 : up.filter(isNew).length;
+  const what = {all: "upcoming event", star: "upcoming fave", hidden: "passed event"}[upMode];
+  document.getElementById("up-count").innerHTML = (n ? n+' '+what+(n === 1 ? '' : 's') : 'No '+what+'s')+(newN ? ' · <span class="new">'+newN+' new</span>' : '');
+  const ob = document.getElementById("up-open");
+  ob.textContent = upOpen ? "Hide" : "Show"; ob.setAttribute("aria-expanded", upOpen); ob.hidden = !n;
+  let html = "", last = "", tk = dayKey(now), tmr = dayKey(new Date(+now + 864e5));
+  if(upOpen) for(const e of up){
+    const s = new Date(e.start), k = dayKey(s);
+    if(k !== last){ last = k; html += '<div class="dayhead'+(k===tk?' today':'')+'">'+(k===tk ? "Today" : k===tmr ? "Tomorrow · "+fmtDay(s) : fmtDay(s))+'</div>'; }
+    html += evRow(e, now, "up");
+  }
+  const list = document.getElementById("upcoming");
+  list.innerHTML = html; list.hidden = !html;
+  const u = S.events.updated;
+  if(u) document.getElementById("ev-updated").textContent = "Events updated "+new Date(u).toLocaleString([], {weekday:"short", hour:"numeric", minute:"2-digit"});
+}
+function listCard(kind, title, items, checked, countLabel){
+  const done = checked ? items.filter(t => checked[t.id]).length : 0;
+  const ed = editing[kind];
+  let h = '<div class="cardhead"><h3>'+title+'</h3><span class="count">'+(checked ? done+" of "+items.length : countLabel || "")+'</span><button class="linkbtn" type="button" data-edit="'+kind+'">'+(ed ? "Done" : "Edit")+'</button></div><div class="list">';
+  for(const t of items){
+    h += '<div class="task">'+(checked
+      ? '<label><input type="checkbox" id="c-'+kind+'-'+t.id+'" data-check="'+kind+'" data-id="'+t.id+'"'+(checked[t.id]?" checked":"")+'><span>'+esc(t.label)+'</span></label>'
+      : '<span style="flex:1">'+esc(t.label)+'</span>')
+      +(ed ? '<button class="del" type="button" data-del="'+kind+'" data-id="'+t.id+'" aria-label="Remove '+esc(t.label)+'">×</button>' : '')+'</div>';
+  }
+  if(!items.length) h += '<div class="empty">Nothing here yet. Tap Edit to add one.</div>';
+  h += '</div>';
+  if(ed) h += '<form class="addrow" data-add="'+kind+'"><input id="add-'+kind+'" placeholder="Add an item" autocomplete="off"><button class="btn" type="submit">Add</button></form>';
+  return h;
+}
+function currentChecks(){
+  const now = new Date(), c = S.checks;
+  return { daily: c.day === dayKey(now) ? c.daily || {} : {}, weekly: c.week === weekKey(now) ? c.weekly || {} : {} };
+}
+function renderLists(){
+}
+function render(){
+  nowCount();
+  document.getElementById("today-label").textContent = new Date().toLocaleDateString([], {weekday:"short", day:"numeric", month:"short"});
+  renderEvents(); renderLists();
+}
+
+/* ---------- interactions ---------- */
+document.addEventListener("click", ev => {
+  const b = ev.target.closest("button"); if(!b) return;
+  if(b.dataset.now){ nowMode = b.dataset.now; lsSet("nowMode", nowMode); renderEvents(); return; }
+  if(b.dataset.up){ upMode = b.dataset.up; lsSet("upFilter", upMode); renderEvents(); return; }
+  if(b.id === "up-open"){ upOpen = !upOpen; lsSet("upOpen", upOpen); renderEvents(); return; }
+  if(b.dataset.star){
+    const id = b.dataset.star, st = S.prefs.starred, on = !st.includes(id);
+    S.prefs = {...S.prefs, starred: on ? st.concat(id) : st.filter(x => x !== id), hidden: on ? hiddenList().filter(x => x !== id) : hiddenList()};
+    save("prefs"); markSeen([id]); renderEvents(); return;
+  }
+  if(b.dataset.rshow){ rShow[b.dataset.rshow] = !rShow[b.dataset.rshow]; renderEvents(); return; }
+  if(b.dataset.cross){
+    const id = b.dataset.cross, t = b.dataset.task, items = {...((S.crossed && S.crossed.items) || {})}, l = items[id] || [];
+    items[id] = l.includes(t) ? l.filter(x => x !== t) : l.concat(t);
+    if(!items[id].length) delete items[id];
+    S.crossed = {items}; save("crossed"); renderEvents(); return;
+  }
+  if(b.dataset.noteDel && noteEditing){
+    const {id, idx} = noteEditing;
+    setNotes(id, notesOf(id).filter((_, i) => i !== idx)); noteEditing = null; renderEventLists(); return;
+  }
+  if(b.dataset.noteEdit){
+    const id = b.dataset.noteEdit, idx = +b.dataset.idx;
+    noteEditing = noteEditing && noteEditing.id === id && noteEditing.idx === idx ? null : {id, idx};
+    renderEventLists();
+    const ni = document.getElementById("note-input");
+    if(ni){ ni.focus(); ni.setSelectionRange(ni.value.length, ni.value.length); }
+    return;
+  }
+  if(b.dataset.noteCancel){ noteEditing = null; renderEventLists(); return; }
+  if(b.dataset.hide){
+    const id = b.dataset.hide, h = hiddenList(), pass = !h.includes(id);
+    if(pass && S.prefs.starred.includes(id)) return;
+    S.prefs = {...S.prefs, hidden: pass ? h.concat(id) : h.filter(x => x !== id)};
+    save("prefs"); markSeen([id]); renderEvents(); loadResearch(); return;
+  }
+  if(b.dataset.edit){ editing[b.dataset.edit] = !editing[b.dataset.edit]; renderLists(); if(editing[b.dataset.edit]) document.getElementById("add-"+b.dataset.edit)?.focus(); return; }
+  if(b.dataset.del){
+    const k = b.dataset.del, id = b.dataset.id;
+    if(k === "goals"){ S.goals.items = S.goals.items.filter(t => t.id !== id); save("goals"); }
+    else { S.tasks[k] = S.tasks[k].filter(t => t.id !== id); save("tasks"); }
+    renderLists(); return;
+  }
+});
+document.addEventListener("change", ev => {
+  const i = ev.target; if(!i.dataset || !i.dataset.check) return;
+  const now = new Date(), c = currentChecks();
+  c[i.dataset.check][i.dataset.id] = i.checked;
+  if(!i.checked) delete c[i.dataset.check][i.dataset.id];
+  S.checks = {day:dayKey(now), daily:c.daily, week:weekKey(now), weekly:c.weekly};
+  save("checks"); renderLists();
+});
+document.addEventListener("submit", ev => {
+  if(ev.target.dataset.noteForm){
+    ev.preventDefault();
+    const id = ev.target.dataset.noteForm, idx = +ev.target.dataset.idx, text = document.getElementById("note-input").value.trim();
+    const list = notesOf(id).slice();
+    if(idx < 0){ if(text) list.push(text); } else if(text) list[idx] = text; else list.splice(idx, 1);
+    setNotes(id, list); if(text) markSeen([id]); noteEditing = null; renderEventLists(); return;
+  }
+  const f = ev.target; if(!f.dataset.add) return;
+  ev.preventDefault();
+  const k = f.dataset.add, input = f.querySelector("input"), label = input.value.trim();
+  if(!label) return;
+  const item = {id:"i"+Date.now().toString(36), label};
+  if(k === "goals"){ S.goals.items = S.goals.items.concat(item); save("goals"); }
+  else { S.tasks[k] = S.tasks[k].concat(item); save("tasks"); }
+  renderLists(); document.getElementById("add-"+k)?.focus();
+});
+
+/* ---------- boot ---------- */
+for(const k of DOCS){ const v = lsGet(k); if(v) S[k] = v; }
+// Older saves could have an event both starred and passed; the star wins.
+if(S.prefs.starred.some(id => hiddenList().includes(id))){ S.prefs = {...S.prefs, hidden: hiddenList().filter(id => !S.prefs.starred.includes(id))}; save("prefs"); }
+forgetFinished();
+loadStats();
+ensureSeen();
+render();
+setInterval(renderEvents, 60000);
+document.addEventListener("visibilitychange", () => { if(!document.hidden) render(); });
+
+/* ---------- events from Leek Duck (via ScrapedDuck) ---------- */
+function toItems(feed){
+  const now = new Date(), until = new Date(+now + DAYS_AHEAD*864e5), out = [];
+  for(const e of feed){
+    if(!e.start || !e.end) continue;
+    const s = new Date(e.start), en = new Date(e.end);
+    if(!(en > now) || s > until) continue;
+    const link = e.link || "";
+    const x = e.extraData || {}, bonuses = [];
+    if(x.spotlight && x.spotlight.bonus) bonuses.push(x.spotlight.bonus);
+    if(x.communityday && x.communityday.bonuses) for(const b of x.communityday.bonuses) if(b.text) bonuses.push(b.text);
+    out.push({ id: link.replace(/\/+$/,"").split("/").pop() || e.name, name: e.name, type: e.eventType || "event",
+      heading: e.heading || "", start: e.start, end: e.end, link, bonuses });
+  }
+  return out;
+}
+let loading = false;
+async function loadEvents(manual){
+  if(loading) return; loading = true;
+  const label = document.getElementById("ev-updated");
+  if(manual) label.textContent = "Refreshing…";
+  try{
+    const r = await fetch(FEED, {cache:"no-store"});
+    if(!r.ok) throw new Error(r.status);
+    const items = toItems(await r.json());
+    if(items.length){ forgetFinished(); S.events = {items, updated:new Date().toISOString()}; save("events"); }
+    ensureSeen(); renderEvents(); loadResearch();
+  }catch(e){
+    label.textContent = S.events.items.length ? "Couldn't reach Leek Duck. Showing saved events." : "Couldn't load events. Check your connection and tap Refresh.";
+  }finally{ loading = false; }
+}
+document.getElementById("refresh-btn").addEventListener("click", () => loadEvents(true));
+document.addEventListener("visibilitychange", () => {
+  if(document.hidden) return;
+  const u = S.events.updated;
+  if(!u || Date.now() - new Date(u) > 3*3600e3) loadEvents(); else loadResearch();
+});
+loadEvents();
+</script>
+</body>
+</html>
