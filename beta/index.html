@@ -390,6 +390,7 @@ async function loadResearch(){
       R[e.id] = {v: R_VER, at: Date.now(), ...parseResearch(await res.text())};
       lsSet("research", R);
       if(R[e.id].tasks.length) renderEvents();
+      if(sheetFor === e.id) renderSheet();
     }catch{}
   }
   for(const id of Object.keys(R)) if(!items.some(e => e.id === id)) delete R[id];
@@ -489,8 +490,7 @@ const GUIDE_GROUPS = {
   cday:    {label: "Community Day guides", types: ["community-day"], tips: [
     "Check the event's bonuses and use a Star Piece or Lucky Egg to match",
     "Evolve the featured Pokémon during the event for its exclusive move (check Leek Duck for the window)",
-    "Tap-check every featured Pokémon for a shiny",
-    "Do the event field research for extra encounters"]},
+    "Tap-check every featured Pokémon for a shiny"]},
   spot:    {label: "Spotlight Hour guides", types: ["pokemon-spotlight-hour"], tips: [
     "Check the bonus (Stardust, XP or Candy) and use a Star Piece or Lucky Egg to match",
     "Use an Incense to find more of the featured Pokémon"]},
@@ -499,7 +499,6 @@ const GUIDE_GROUPS = {
     "Pick a team that fits the league's CP limit"]},
   event:   {label: "Event guides", types: [], tips: [
     "Read the event's bonuses on Leek Duck",
-    "Check the field research tasks for this event",
     "Fill your incubators if there's an egg or hatch bonus"]},
   outing:  {label: "Every outing", types: [], tips: [
     "Charge your phone and bring a battery pack",
@@ -531,6 +530,10 @@ function tipForBonus(raw){
   if(/raid pass/.test(t)) return say("Spin Gyms for extra free Raid Passes");
   return "Bonus: "+b;
 }
+function researchLine(t){
+  const names = t.rw.map(w => w.n).filter(Boolean);
+  return "Field research: "+t.t+(names.length ? " → "+(names.length > 1 ? names.slice(0, -1).join(", ")+" or "+names[names.length-1] : names[0]) : "");
+}
 function bonusesOf(e){
   const list = (e.bonuses || []).concat((R[e.id] && R[e.id].bonuses) || []);
   return [...new Set(list)].map(tipForBonus);
@@ -561,6 +564,13 @@ function renderSheet(){
   let h = '<div class="sheet" role="dialog" aria-modal="true" aria-label="Game plan"><div class="sheet-top"><div><h2>💡 '+esc(evName)+'</h2><div class="sub">Tap + to add a step to your Now list</div></div>'+
     '<button class="btn ghost small" type="button" data-sheet-close="1">Done</button></div>';
   h += '<div><button class="btn" type="button" data-addall="1">Add all to Now</button></div>';
+  const field = ev && R[ev.id] && R[ev.id].tasks || [];
+  if(field.length){
+    h += '<div class="gcard"><div class="gtitle">Field research</div>'+field.map(t => { const line = researchLine(t);
+      return '<div class="gline"><span>'+esc(t.t)+'<span class="rt-rew" style="display:flex">'+rwHtml(t.rw)+'</span></span>'+addBtn(line)+'</div>'; }).join("")+'</div>';
+  } else if(ev && ["event","community-day","research","research-day","hatch-day","choose-your-path","max-battles","raid-day"].includes(ev.type) && !(R[ev.id])){
+    h += '<div class="sub">Checking Leek Duck for field research…</div>';
+  }
   if(bonus.length){
     h += '<div class="gcard"><div class="gtitle">From this event\'s bonuses</div>'+bonus.map(t => '<div class="gline"><span>'+esc(t)+'</span>'+addBtn(t)+'</div>').join("")+'</div>';
   }
@@ -614,7 +624,11 @@ document.addEventListener("click", ev => {
   const c = sheetCtx();
   if(b.dataset.sheetClose){ closeSheet(); renderEvents(); renderNow(); return; }
   if(b.dataset.addnow){ addNow(c.evId, c.evName, b.dataset.addnow); markSeen([c.evId]); renderSheet(); nowCount(); return; }
-  if(b.dataset.addall){ for(const t of (c.ev ? bonusesOf(c.ev) : []).concat(guidesOf(c.key).map(g => g.text))) addNow(c.evId, c.evName, t); renderSheet(); nowCount(); return; }
+  if(b.dataset.addall){
+    const field = c.ev && R[c.ev.id] && R[c.ev.id].tasks || [];
+    for(const t of field.map(researchLine).concat(c.ev ? bonusesOf(c.ev) : [], guidesOf(c.key).map(g => g.text))) addNow(c.evId, c.evName, t);
+    renderSheet(); nowCount(); return;
+  }
   if(b.dataset.geditOpen){ gEdit = b.dataset.geditOpen; gAdding = false; renderSheet(); return; }
   if(b.dataset.gcancel){ gEdit = null; gAdding = false; renderSheet(); return; }
   if(b.dataset.gdel){ setGuides(c.key, guidesOf(c.key).filter(g => g.id !== b.dataset.gdel)); renderSheet(); return; }
@@ -653,7 +667,7 @@ function evRow(e, now, mode){
     '<button class="star" type="button" data-star="'+esc(e.id)+'" aria-pressed="'+starred+'" aria-label="'+(starred?'Remove star from ':'Star ')+esc(e.name)+'" title="'+(starred?'Remove star':'Star')+'">'+STAR+'</button>'+
     '<button class="hide" type="button" data-hide="'+esc(e.id)+'"'+(starred && !hid ? ' disabled' : '')+' aria-label="'+(hid?'Bring back ':'Pass on ')+esc(e.name)+'" title="'+(hid?'Bring back':starred?'Remove the star first to pass on this event':'Pass on this event')+'">'+(hid?'↺':'×')+'</button></div>';
   const meta = '<div class="meta"><a class="chip" href="'+esc(e.link || "https://leekduck.com/events/")+'" target="_blank" rel="noopener">'+esc(label)+'</a>'+cpHtml(e)+when+'</div>';
-  const extra = noteHtml + researchHtml(e);
+  const extra = noteHtml;
   return '<div class="ev'+(hid?' is-hidden':'')+'" style="--c:'+color+'"><div class="main"><div class="name">'+name+'</div></div>'+acts+meta+
     (extra ? '<div class="extra">'+extra+'</div>' : '')+'</div>';
 }
