@@ -11,8 +11,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#f3f6f9" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f161d" media="(prefers-color-scheme: dark)">
-<link rel="apple-touch-icon" href="../apple-touch-icon.png">
-<link rel="icon" type="image/png" href="../icon-192.png">
+<link rel="apple-touch-icon" href="/pops-go/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/pops-go/icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Rubik:wght@400;500;600&display=swap">
@@ -559,8 +559,8 @@ function nowCount(){}
 const BULB = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1.1 2V16h5v-.2c.1-.8.5-1.5 1.1-2A6 6 0 0 0 12 3z"/></svg>';
 const TRASH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg>';
 
-let sheetFor = null, gEdit = null, gAdding = false, gResetAsk = false; // sheetFor = event id or "outing"
-function openSheet(id){ sheetFor = id; gEdit = null; gAdding = false; gResetAsk = false; renderSheet(); document.body.style.overflow = "hidden"; }
+let sheetFor = null, gEdit = null, gAdding = false; // sheetFor = event id or "outing"
+function openSheet(id){ sheetFor = id; gEdit = null; gAdding = false; renderSheet(); document.body.style.overflow = "hidden"; }
 function closeSheet(){ sheetFor = null; document.getElementById("sheet").hidden = true; document.body.style.overflow = ""; }
 function sheetCtx(){
   const ev = sheetFor === "outing" ? null : (S.events.items || []).find(e => e.id === sheetFor);
@@ -588,8 +588,7 @@ function renderSheet(){
   if(!guides.length) h += '<div class="gline"><span style="color:var(--muted)">Nothing here yet. Add your own below.</span></div>';
   if(gAdding) h += '<form class="gform" data-gadd="1"><input id="g-input" placeholder="New line" autocomplete="off" maxlength="160"><button class="btn" type="submit">Add</button><button class="btn ghost" type="button" data-gcancel="1">Cancel</button></form>';
   h += '<div class="gfoot">'+(gAdding ? '<span></span>' : '<button class="linkbtn" type="button" data-gadd-open="1">+ Add your own</button>')+
-    (gResetAsk ? '<span><b>Reset?</b> <button class="linkbtn" type="button" data-greset="yes">Yes</button> <button class="linkbtn" type="button" data-greset="no">Cancel</button></span>'
-               : '<button class="linkbtn" type="button" data-greset="ask">Reset to starter tips</button>')+'</div></div></div>';
+'</div></div></div>';
   el.innerHTML = h; el.hidden = false;
   const inp = document.getElementById("g-input"); if(inp){ inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
 }
@@ -631,7 +630,6 @@ document.addEventListener("click", ev => {
     renderSheet(); return;
   }
   if(b.dataset.gaddOpen){ gAdding = true; gEdit = null; renderSheet(); return; }
-  if(b.dataset.greset){ if(b.dataset.greset === "yes"){ resetGuides(c.key); gResetAsk = false; } else gResetAsk = b.dataset.greset === "ask"; renderSheet(); return; }
 });
 document.addEventListener("submit", ev => {
   const f = ev.target; if(!sheetFor || !(f.dataset.gedit || f.dataset.gadd)) return;
