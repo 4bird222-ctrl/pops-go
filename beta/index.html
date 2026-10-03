@@ -67,7 +67,8 @@ header h1{white-space:nowrap}
 .bulb.has{color:#e0a800}
 .bulb{position:relative}
 .bulb.unseen::after{content:"";position:absolute;top:6px;right:4px;width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--surface)}
-.newbtn,.newbtn[aria-pressed]{background:var(--accent);color:var(--accent-ink);box-shadow:none}
+.newdot{position:absolute;top:50%;transform:translateY(-50%);width:30px;height:30px;padding:0;border:0;background:none;cursor:pointer;display:grid;place-items:center}
+.newdot::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--accent)}
 /* Now list: plain text on white */
 .nowhead{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .nowlist{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px 0}
@@ -220,7 +221,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center}
       <div class="date" id="today-label"></div>
     </div>
     <button class="nowbtn" type="button" id="open-now" aria-pressed="true" aria-label="Show or hide my Now list">NOW</button>
-    <button class="nowbtn newbtn" type="button" id="open-new" hidden aria-label="New events to review">NEW</button>
+    <button class="newdot" type="button" id="open-new" hidden aria-label="New events to review" title="New events to review"></button>
   </header>
 
   <div id="main-view" hidden>
@@ -792,7 +793,7 @@ function alignNow(){
   const left = Math.min(hd.width - btn.offsetWidth, f.left + f.width / 2 - hd.left - btn.offsetWidth / 2 + 14);
   btn.style.left = left+"px";
   const nb = document.getElementById("open-new");
-  nb.style.right = "auto"; nb.style.left = (left - (nb.offsetWidth || 52) - 8)+"px";
+  nb.style.left = (left - 30)+"px";
 }
 window.addEventListener("resize", alignNow);
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(alignNow);
