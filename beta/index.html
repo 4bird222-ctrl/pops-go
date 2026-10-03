@@ -419,7 +419,7 @@ function markSeen(ids){
   const cur = seenIds(), add = ids.filter(i => !cur.includes(i));
   if(!add.length) return;
   const live = new Set((S.events.items || []).map(e => e.id));
-  S.seen = {ids: cur.filter(i => live.has(i)).concat(add)};
+  S.seen = {v: 2, ids: cur.filter(i => live.has(i)).concat(add)};
   save("seen");
 }
 function forgetFinished(){
@@ -431,15 +431,17 @@ function forgetFinished(){
   const notes = {...((S.notes && S.notes.items) || {})}, crossed = {...((S.crossed && S.crossed.items) || {})};
   for(const id of gone){ delete notes[id]; delete crossed[id]; }
   S.notes = {items: notes}; S.crossed = {items: crossed};
-  if(S.seen) S.seen = {ids: keep(S.seen.ids)};
+  if(S.seen) S.seen = {...S.seen, ids: keep(S.seen.ids)};
   if(S.nowlist && S.nowlist.items.some(i => gone.has(i.ev))) S.nowlist = {items: S.nowlist.items.filter(i => !gone.has(i.ev))};
   if(S.guides && S.guides.bonus && [...gone].some(id => id in S.guides.bonus)){ const bb = {...S.guides.bonus}; for(const id of gone) delete bb[id]; S.guides = {...S.guides, bonus: bb}; save("guides"); }
   for(const k of ["prefs","notes","crossed","seen","nowlist"]) if(S[k]) save(k);
 }
 function ensureSeen(){
-  // First run: everything already listed counts as seen, so only events added later are tagged.
-  if(S.seen || !(S.events.items || []).length) return;
-  S.seen = {ids: S.events.items.map(e => e.id)};
+  // An event counts as reviewed only once you've done something with it: opened its 💡, starred it,
+  // passed on it, or put a step on your Now list. (v2 replaces the old "everything at first launch" rule.)
+  if(S.seen && S.seen.v === 2) return;
+  const done = new Set([...(S.prefs.starred || []), ...(S.prefs.hidden || []), ...nowItems().map(i => i.ev)]);
+  S.seen = {v: 2, ids: (S.events.items || []).map(e => e.id).filter(id => done.has(id))};
   save("seen");
 }
 /* hundo CP for raid bosses: level 20 normally, level 25 when weather boosted */
