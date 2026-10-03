@@ -39,11 +39,11 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
-html,body{overflow-x:hidden;overscroll-behavior-x:none;max-width:100%}
+html,body{overflow-x:clip;overscroll-behavior-x:none;max-width:100%}
 body,button,a,label,input{touch-action:manipulation}
 input,textarea,select{font-size:16px!important}
 body{background:var(--bg);color:var(--ink);font:15px/1.45 var(--body);margin:0}
-.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:calc(env(safe-area-inset-top,0px) + 18px) calc(env(safe-area-inset-bottom,0px) + 48px);display:flex;flex-direction:column;gap:22px}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:0 calc(env(safe-area-inset-bottom,0px) + 48px);display:flex;flex-direction:column;gap:22px}
 h1,h2{font-family:var(--display);font-weight:600;margin:0;text-wrap:balance}
 h1{font-size:30px;letter-spacing:.2px}
 h2{font-size:19px}
@@ -56,9 +56,10 @@ header{display:flex;align-items:center;gap:16px}
 header .who{flex:1;min-width:0}
 header .date{color:var(--muted);font-size:13.5px}
 .beta{display:inline-block;vertical-align:6px;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--sunk);color:var(--muted);font:600 11px/1.5 var(--body);letter-spacing:.6px;text-transform:uppercase}
-header{position:relative}
+header{position:sticky;top:0;z-index:15;background:var(--bg);margin-inline:-16px;padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 10px;transition:box-shadow .2s}
+header.stuck{box-shadow:0 1px 0 var(--line),0 4px 12px rgb(0 0 0 / .06)}
 header h1{white-space:nowrap}
-.nowbtn{position:absolute;right:0;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 13px var(--display);cursor:pointer}
+.nowbtn{position:absolute;right:16px;top:calc(env(safe-area-inset-top,0px) + 36px);transform:translateY(-50%);display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 13px var(--display);cursor:pointer}
 .nowbtn{letter-spacing:.8px}
 .nowbtn[aria-pressed="false"]{background:var(--surface);color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
 .bulb{border:0;background:none;cursor:pointer;width:32px;height:36px;display:grid;place-items:center;border-radius:50%;color:var(--muted)}
@@ -67,7 +68,7 @@ header h1{white-space:nowrap}
 .bulb.has{color:#e0a800}
 .bulb{position:relative}
 .bulb.unseen::after{content:"";position:absolute;top:6px;right:4px;width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--surface)}
-.newdot{position:absolute;top:50%;transform:translateY(-50%);width:30px;height:30px;padding:0;border:0;background:none;cursor:pointer;display:grid;place-items:center}
+.newdot{position:absolute;top:calc(env(safe-area-inset-top,0px) + 36px);transform:translateY(-50%);width:30px;height:30px;padding:0;border:0;background:none;cursor:pointer;display:grid;place-items:center}
 .newdot::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--accent)}
 /* Now list: plain text on white */
 .nowhead{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -792,10 +793,13 @@ function alignNow(){
   btn.style.right = "auto";
   const left = Math.min(hd.width - btn.offsetWidth, f.left + f.width / 2 - hd.left - btn.offsetWidth / 2 + 14);
   btn.style.left = left+"px";
+  const lg = document.querySelector(".logo").getBoundingClientRect(), mid = (lg.top + lg.height / 2 - hd.top)+"px";
+  btn.style.top = mid; document.getElementById("open-new").style.top = mid;
   const nb = document.getElementById("open-new");
   nb.style.left = (left - 30)+"px";
 }
 window.addEventListener("resize", alignNow);
+window.addEventListener("scroll", () => document.querySelector("header").classList.toggle("stuck", window.scrollY > 4), {passive: true});
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(alignNow);
 function render(){
   nowCount();
