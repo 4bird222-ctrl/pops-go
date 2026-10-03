@@ -591,8 +591,11 @@ function renderSheet(){
   const guides = guidesOf(c.key);
   h += '<div class="gcard">'+guides.map(g => line("g:"+g.id, g.text)).join("");
   if(!guides.length) h += '<div class="gline"><span style="color:var(--muted)">Nothing here yet. Add your own below.</span></div>';
-  if(gAdding) h += '<form class="gform" data-gadd="1"><input id="g-input" placeholder="New line" autocomplete="off" maxlength="160"><button class="btn" type="submit">Add</button><button class="btn ghost" type="button" data-gcancel="1">Cancel</button></form>';
-  h += '<div class="gfoot">'+(gAdding ? '<span></span>' : '<button class="linkbtn" type="button" data-gadd-open="1">+ Add your own</button>')+
+  const typeName = GUIDE_GROUPS[c.key].label.replace(/ guides$/, "");
+  if(gAdding) h += '<form class="gform" data-gadd="'+gAdding+'"><input id="g-input" placeholder="'+(gAdding === "event" ? "Goes straight to Now, this event only" : c.ev ? "Kept for every "+esc(typeName)+" event" : "New checklist line")+'" autocomplete="off" maxlength="160"><button class="btn" type="submit">Add</button><button class="btn ghost" type="button" data-gcancel="1">Cancel</button></form>';
+  h += '<div class="gfoot">'+(gAdding ? '<span></span>' : c.ev
+      ? '<button class="linkbtn" type="button" data-gadd-open="event">+ This event only</button><button class="linkbtn" type="button" data-gadd-open="guide">+ All '+esc(typeName)+' events</button>'
+      : '<button class="linkbtn" type="button" data-gadd-open="guide">+ Add your own</button>')+
 '</div></div></div>';
   el.innerHTML = h; el.hidden = false;
   const inp = document.getElementById("g-input"); if(inp){ inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
@@ -638,13 +641,14 @@ document.addEventListener("click", ev => {
     else setGuides(c.key, guidesOf(c.key).filter(g => g.id !== k.slice(2)));
     renderSheet(); return;
   }
-  if(b.dataset.gaddOpen){ gAdding = true; gEdit = null; renderSheet(); return; }
+  if(b.dataset.gaddOpen){ gAdding = b.dataset.gaddOpen; gEdit = null; renderSheet(); return; }
 });
 document.addEventListener("submit", ev => {
   const f = ev.target; if(!sheetFor || !(f.dataset.gedit || f.dataset.gadd)) return;
   ev.preventDefault(); ev.stopImmediatePropagation();
   const c = sheetCtx(), text = document.getElementById("g-input").value.trim();
-  if(f.dataset.gedit && f.dataset.gedit.startsWith("b:")) setBonusEdit(c.evId, f.dataset.gedit.slice(2), text);
+  if(f.dataset.gadd === "event"){ if(text){ addNow(c.evId, c.evName, text); markSeen([c.evId]); } }
+  else if(f.dataset.gedit && f.dataset.gedit.startsWith("b:")) setBonusEdit(c.evId, f.dataset.gedit.slice(2), text);
   else {
     const list = guidesOf(c.key).slice();
     if(f.dataset.gedit){ const i = list.findIndex(g => g.id === f.dataset.gedit.slice(2)); if(i >= 0){ if(text) list[i] = {...list[i], text}; else list.splice(i, 1); } }
@@ -757,7 +761,7 @@ function alignNow(){
   if(!btn || !fav || !fav.offsetWidth) return;
   const f = fav.getBoundingClientRect(), hd = btn.parentElement.getBoundingClientRect();
   btn.style.right = "auto";
-  btn.style.left = Math.min(hd.width - btn.offsetWidth, f.left + f.width / 2 - hd.left - btn.offsetWidth / 2)+"px";
+  btn.style.left = Math.min(hd.width - btn.offsetWidth, f.left + f.width / 2 - hd.left - btn.offsetWidth / 2 + 14)+"px";
 }
 window.addEventListener("resize", alignNow);
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(alignNow);
