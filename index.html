@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>Pops Go</title>
+<title>Pops Go Beta</title>
 <meta name="description" content="Pokémon GO events, checklists and goals.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Pops Go">
+<meta name="apple-mobile-web-app-title" content="Pops Go β">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#f3f6f9" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f161d" media="(prefers-color-scheme: dark)">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="icon" type="image/png" href="../icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Rubik:wght@400;500;600&display=swap">
@@ -55,6 +55,46 @@ header{display:flex;align-items:center;gap:16px}
 .logo{width:44px;height:44px;flex:none}
 header .who{flex:1;min-width:0}
 header .date{color:var(--muted);font-size:13.5px}
+.beta{display:inline-block;vertical-align:6px;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--sunk);color:var(--muted);font:600 11px/1.5 var(--body);letter-spacing:.6px;text-transform:uppercase}
+.nowbtn{display:inline-flex;align-items:center;gap:7px;flex:none;padding:8px 14px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 15px var(--display);cursor:pointer}
+.nowbtn{letter-spacing:.8px}
+.nowbtn[aria-pressed="true"]{background:var(--surface);color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
+.bulb{border:0;background:none;cursor:pointer;width:32px;height:36px;display:grid;place-items:center;border-radius:50%;color:var(--muted)}
+.bulb svg{width:18px;height:18px}
+.bulb:hover{background:var(--sunk);color:var(--ink)}
+.bulb.has{color:#e0a800}
+/* Now list: plain text on white */
+.nowhead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.nowlist{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px 0}
+.nowgroup{padding:8px 14px 4px;font:600 12px var(--body);letter-spacing:.6px;text-transform:uppercase;color:#a3adb8}
+.nowgroup + .nowline{border-top:0}
+.nowline{display:flex;align-items:flex-start;gap:10px;padding:9px 6px 9px 12px;border-top:1px solid var(--line);font-size:16px;line-height:1.4}
+.nowline:first-child{border-top:0}
+.dot{flex:none;width:24px;height:24px;margin-top:-1px;border-radius:50%;background:var(--c);color:#fff;font:600 12px/24px var(--body);text-align:center;font-variant-numeric:tabular-nums}
+.dot.plain{background:var(--line)}
+.nowline > span:not(.dot){flex:1;min-width:0;overflow-wrap:anywhere}
+.nowline .x{flex:none;border:0;background:none;color:var(--muted);cursor:pointer;width:34px;height:30px;border-radius:50%;font-size:20px;line-height:1}
+.nowline .x:hover{background:var(--sunk);color:var(--accent)}
+.nowactions{display:flex;gap:8px;flex-wrap:wrap}
+/* guide sheet */
+.sheet-bg{position:fixed;inset:0;z-index:20;background:rgb(0 0 0 / .35);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:640px;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bg);border-radius:18px 18px 0 0;padding:16px 16px calc(env(safe-area-inset-bottom,0px) + 20px);display:flex;flex-direction:column;gap:12px}
+.sheet h2{font-size:19px}
+.sheet .sub{color:var(--muted);font-size:13px;margin-top:2px}
+.sheet-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.gcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px 0}
+.gtitle{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px 4px 14px;font:600 12px var(--body);letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
+.gline{display:flex;align-items:center;gap:4px;padding:6px 6px 6px 14px;border-top:1px solid var(--line);font-size:15px;line-height:1.4}
+.gtitle + .gline{border-top:0}
+.gline > span{flex:1;min-width:0;overflow-wrap:anywhere}
+.gbtn{flex:none;border:0;background:none;cursor:pointer;width:34px;height:34px;border-radius:50%;color:var(--muted);font-size:18px;line-height:1;display:grid;place-items:center}
+.gbtn:hover{background:var(--sunk);color:var(--ink)}
+.gbtn.add{color:var(--ok);font-size:24px}
+.gbtn.added{color:var(--ok);font-size:17px;cursor:default}
+.gbtn svg{width:16px;height:16px}
+.gform{display:flex;gap:6px;flex-wrap:wrap;padding:8px 10px 8px 14px;border-top:1px solid var(--line)}
+.gform input{flex:1 1 100%;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-family:var(--body)}
+.gfoot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 10px 6px 14px;border-top:1px solid var(--line)}
 
 .section{display:flex;flex-direction:column;gap:10px}
 .sechead{display:flex;align-items:center;gap:8px;justify-content:space-between;flex-wrap:wrap}
@@ -167,10 +207,13 @@ footer{color:var(--muted);font-size:12.5px;text-align:center}
       <circle cx="22" cy="22" r="6" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
     </svg>
     <div class="who">
-      <h1>Pops Go</h1>
+      <h1>Pops Go<span class="beta">beta</span></h1>
       <div class="date" id="today-label"></div>
     </div>
+    <button class="nowbtn" type="button" id="open-now" aria-pressed="false" aria-label="Show or hide my Now list">NOW</button>
   </header>
+
+  <div id="main-view">
 
   <section class="section">
     <div class="sechead">
@@ -202,7 +245,16 @@ footer{color:var(--muted);font-size:12.5px;text-align:center}
     <button class="linkbtn" type="button" id="refresh-btn">Refresh now</button>
   </footer>
   <footer>Event data from <a href="https://leekduck.com/events/" target="_blank" rel="noopener">Leek Duck</a>. Tap an event name to open its page.</footer>
+  </div>
+
+  <section class="section" id="now-view" hidden>
+    <div id="now-body"></div>
+    <div class="nowactions">
+      <button class="btn ghost" type="button" data-guide="outing">💡 Checklist</button>
+    </div>
+  </section>
 </div>
+<div class="sheet-bg" id="sheet" hidden></div>
 
 <script>
 const DAYS_AHEAD = 14; // fetch, show and check research for events starting within this many days
@@ -229,12 +281,14 @@ const DEFAULTS = {
   checks: {day:"",daily:{},week:"",weekly:{}},
   notes: {items:{}},
   crossed: {items:{}},
+  guides: {groups:{}},
+  nowlist: {items:[]},
   goals: {items:[
     {id:"g1",label:"Stock up on Stardust and Poké Balls for Zorua Community Day (Sat 10 Oct)"},
     {id:"g2",label:"Raid Xerneas while it's in 5-star raids (until Tue 6 Oct)"}
   ]}
 };
-const DOCS = ["events","prefs","tasks","checks","goals","notes","crossed","seen"];
+const DOCS = ["events","prefs","tasks","checks","goals","notes","crossed","seen","guides","nowlist"];
 const S = JSON.parse(JSON.stringify(DEFAULTS));
 let nowMode = ["all","star","hidden"].includes(lsGet("nowMode")) ? lsGet("nowMode") : "all",
     upMode = ["all","star","hidden"].includes(lsGet("upFilter")) ? lsGet("upFilter") : (lsGet("upMode") === "hidden" ? "hidden" : "all"),
@@ -287,7 +341,7 @@ function noteForm(id, idx, text){
 }
 
 /* field research from each event's Leek Duck page */
-const R_VER = 3;
+const R_VER = 4;
 let R = lsGet("research") || {}, rOpen = lsGet("ropen") || {}, rShow = {};
 const crossedOf = id => (S.crossed && S.crossed.items && S.crossed.items[id]) || [];
 const rwHtml = list => list.map(w => '<span class="rw">'+(w.img ? '<img src="'+esc(w.img)+'" alt="" loading="lazy">' : '')+esc(w.n)+'</span>').join("");
@@ -320,9 +374,12 @@ function parseResearch(html){
     t: clean(li.querySelector(".task")?.textContent),
     rw: [...li.querySelectorAll(".reward")].map(w => ({ n: clean(w.querySelector(".reward-label")?.textContent), img: img(w.querySelector("img.reward-image")) }))
   })).filter(x => x.t);
-  return {tasks};
+  const bonuses = [], h = doc.getElementById("bonuses");
+  for(let el = h && h.nextElementSibling; el && !/^H[23]$/.test(el.tagName); el = el.nextElementSibling)
+    for(const b of el.querySelectorAll(".bonus-text")){ const t = clean(b.textContent); if(t) bonuses.push(t); }
+  return {tasks, bonuses};
 }
-const R_TYPES = new Set(["event","community-day","research","research-day","hatch-day","choose-your-path","max-battles","wild-area","pokemon-go-tour","city-safari","season"]);
+const R_TYPES = new Set(["raid-day","event","community-day","research","research-day","hatch-day","choose-your-path","max-battles","wild-area","pokemon-go-tour","city-safari","season"]);
 let rLoading = false;
 async function loadResearch(){
   if(rLoading) return; rLoading = true;
@@ -366,7 +423,9 @@ function forgetFinished(){
   for(const id of gone){ delete notes[id]; delete crossed[id]; }
   S.notes = {items: notes}; S.crossed = {items: crossed};
   if(S.seen) S.seen = {ids: keep(S.seen.ids)};
-  for(const k of ["prefs","notes","crossed","seen"]) if(S[k]) save(k);
+  if(S.nowlist && S.nowlist.items.some(i => gone.has(i.ev))) S.nowlist = {items: S.nowlist.items.filter(i => !gone.has(i.ev))};
+  if(S.guides && S.guides.bonus && [...gone].some(id => id in S.guides.bonus)){ const bb = {...S.guides.bonus}; for(const id of gone) delete bb[id]; S.guides = {...S.guides, bonus: bb}; save("guides"); }
+  for(const k of ["prefs","notes","crossed","seen","nowlist"]) if(S[k]) save(k);
 }
 function ensureSeen(){
   // First run: everything already listed counts as seen, so only events added later are tagged.
@@ -416,6 +475,179 @@ function cpHtml(e){
   const list = bosses(e).map(b => ({b, cp: hundo(b)})).filter(x => x.cp);
   return list.map(x => '<span class="cp">'+(list.length > 1 ? esc(x.b.name)+' ' : '')+'💯 <b>'+x.cp[0]+'</b> · ☁️ <b>'+x.cp[1]+'</b></span>').join("");
 }
+/* ---------- game-plan guides (permanent, editable per event type) and the Now list ---------- */
+const GUIDE_GROUPS = {
+  raids:   {label: "Raid guides", types: ["raid-battles","raid-hour","raid-day","raid-weekend","elite-raids"], tips: [
+    "Check you have Raid Passes (a free one daily from spinning a Gym)",
+    "Pick a counter team for the boss (Leek Duck's raid page lists the best counters)",
+    "Mega Evolve a Pokémon that shares a type with the boss for an attack boost and bonus Candy",
+    "Set your buddy first if it has a raid task (e.g. Galarian Yamask)",
+    "Team GO Rocket battles don't count as raids",
+    "Compare the boss CP with 💯 before using your best berries",
+    "Join a Party for Party Play bonuses"]},
+  max:     {label: "Max Battle guides", types: ["max-battles","max-mondays"], tips: [
+    "Use a Star Piece before your first Max Battle",
+    "Collect Max Particles at Power Spots before you start",
+    "Bring your strongest Dynamax team (power up its Max Moves)",
+    "Gigantamax battles need a group, so go with friends"]},
+  cday:    {label: "Community Day guides", types: ["community-day"], tips: [
+    "Check the event's bonuses and use a Star Piece or Lucky Egg to match",
+    "Evolve the featured Pokémon during the event for its exclusive move (check Leek Duck for the window)",
+    "Tap-check every featured Pokémon for a shiny"]},
+  spot:    {label: "Spotlight Hour guides", types: ["pokemon-spotlight-hour"], tips: [
+    "Check the bonus (Stardust, XP or Candy) and use a Star Piece or Lucky Egg to match",
+    "Use an Incense to find more of the featured Pokémon"]},
+  gbl:     {label: "GO Battle League guides", types: ["go-battle-league"], tips: [
+    "Check which leagues and cups are running this week",
+    "Pick a team that fits the league's CP limit"]},
+  event:   {label: "Event guides", types: [], tips: [
+    "Read the event's bonuses on Leek Duck",
+    "Fill your incubators if there's an egg or hatch bonus"]},
+  outing:  {label: "Checklist", types: [], tips: [
+    "Charge your phone and bring a battery pack",
+    "Clear some bag space",
+    "Clear some Pokémon storage",
+    "Check your buddy is the one you want",
+    "Open and send gifts / collect your free Raid Pass"]}
+};
+const groupFor = e => Object.keys(GUIDE_GROUPS).find(k => GUIDE_GROUPS[k].types.includes(e.type)) || "event";
+const gid = () => "g"+Date.now().toString(36)+Math.random().toString(36).slice(2, 6);
+function guidesOf(key){
+  const own = S.guides && S.guides.groups && S.guides.groups[key];
+  return own || GUIDE_GROUPS[key].tips.map((t, i) => ({id: key+"-"+i, text: t}));
+}
+function setGuides(key, list){ S.guides = {...S.guides, groups: {...((S.guides && S.guides.groups) || {}), [key]: list}}; save("guides"); }
+function resetGuides(key){ const g = {...((S.guides && S.guides.groups) || {})}; delete g[key]; S.guides = {...S.guides, groups: g}; save("guides"); }
+function tipForBonus(raw){
+  // Short "what to do: why" lines. Every line can still be edited or deleted in the 💡 sheet.
+  const b = raw.replace(/\*+/g, "").trim(), t = b.toLowerCase();
+  let m;
+  if((m = /increased chance (?:to encounter|of encountering) shiny (.+)/i.exec(b))) return "Spawn: Shiny "+m[1];
+  if((m = /increased chance of hatching shiny (.+)/i.exec(b))) return "Hatch: Shiny "+m[1];
+  if(/^increased spawns$/i.test(b)) return "Spawn: more Pokémon";
+  if(/hatch|\begg/.test(t)) return "Incubators: "+b;
+  if(/trade/.test(t)) return "Trade: "+b;
+  if(/transfer candy/.test(t)) return "Transfer: "+b;
+  if(/catch candy/.test(t) && !/xl/.test(t)) return "Pinap: "+b;
+  if(/stardust/.test(t) && /catch|×|x stardust|\d+x/.test(t) && !/less stardust/.test(t)) return "Star Piece: "+b;
+  if(/evolution xp|evolve/.test(t)) return "Lucky Egg + evolve: "+b;
+  if(/\bxp\b/.test(t) && /catch|×|\dx/.test(t)) return "Lucky Egg: "+b;
+  if(/incense/.test(t)) return "Incense: "+b;
+  if(/lure/.test(t)) return "Lure: "+b;
+  if(/max particle/.test(t)) return "Power Spots: "+b;
+  if(/raid pass/.test(t)) return "Raid Passes: "+b;
+  return b;
+}
+const bonusEdits = id => (S.guides && S.guides.bonus && S.guides.bonus[id]) || {};
+function setBonusEdit(id, orig, text){
+  const all = {...((S.guides && S.guides.bonus) || {})};
+  all[id] = {...(all[id] || {}), [orig]: text};
+  S.guides = {...S.guides, bonus: all}; save("guides");
+}
+function bonusesOf(e){
+  // [{orig, text}] after your edits; deleted ones are left out
+  const raw = [...new Set((e.bonuses || []).concat((R[e.id] && R[e.id].bonuses) || []))], ed = bonusEdits(e.id);
+  return raw.map(b => { const orig = tipForBonus(b); return {orig, text: orig in ed ? ed[orig] : orig}; }).filter(x => x.text);
+}
+const nowItems = () => (S.nowlist && S.nowlist.items) || [];
+const inNow = (ev, text) => nowItems().some(i => i.ev === ev && i.text === text);
+function addNow(ev, evName, text){
+  if(inNow(ev, text)) return;
+  S.nowlist = {items: nowItems().concat({id: gid(), ev, evName, text})}; save("nowlist");
+}
+function nowCount(){}
+const BULB = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1.1 2V16h5v-.2c.1-.8.5-1.5 1.1-2A6 6 0 0 0 12 3z"/></svg>';
+const TRASH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg>';
+
+let sheetFor = null, gEdit = null, gAdding = false, gResetAsk = false; // sheetFor = event id or "outing"
+function openSheet(id){ sheetFor = id; gEdit = null; gAdding = false; gResetAsk = false; renderSheet(); document.body.style.overflow = "hidden"; }
+function closeSheet(){ sheetFor = null; document.getElementById("sheet").hidden = true; document.body.style.overflow = ""; }
+function sheetCtx(){
+  const ev = sheetFor === "outing" ? null : (S.events.items || []).find(e => e.id === sheetFor);
+  return {ev, key: ev ? groupFor(ev) : "outing", evId: ev ? ev.id : "outing", evName: ev ? ev.name : "Checklist"};
+}
+function renderSheet(){
+  const el = document.getElementById("sheet");
+  if(!sheetFor){ el.hidden = true; return; }
+  const c = sheetCtx();
+  if(sheetFor !== "outing" && !c.ev){ closeSheet(); return; }
+  const addBtn = text => inNow(c.evId, text)
+    ? '<button class="gbtn added" type="button" disabled aria-label="On your Now list">✓</button>'
+    : '<button class="gbtn add" type="button" data-addnow="'+esc(text)+'" aria-label="Add to Now: '+esc(text)+'">+</button>';
+  const line = (key, text) => gEdit === key
+    ? '<form class="gform" data-gedit="'+esc(key)+'"><input id="g-input" value="'+esc(text)+'" autocomplete="off" maxlength="160"><button class="btn" type="submit">Save</button><button class="btn ghost" type="button" data-gcancel="1">Cancel</button></form>'
+    : '<div class="gline"><span>'+esc(text)+'</span>'+addBtn(text)+
+      '<button class="gbtn" type="button" data-gedit-open="'+esc(key)+'" aria-label="Edit">'+PEN+'</button>'+
+      '<button class="gbtn" type="button" data-gdel="'+esc(key)+'" aria-label="Delete">'+TRASH+'</button></div>';
+  let h = '<div class="sheet" role="dialog" aria-modal="true" aria-label="Game plan"><div class="sheet-top"><h2>💡 '+esc(c.evName)+'</h2>'+
+    '<button class="btn ghost small" type="button" data-sheet-close="1">Done</button></div>';
+  const bonus = c.ev ? bonusesOf(c.ev) : [];
+  if(bonus.length) h += '<div class="gcard">'+bonus.map(b => line("b:"+b.orig, b.text)).join("")+'</div>';
+  const guides = guidesOf(c.key);
+  h += '<div class="gcard">'+guides.map(g => line("g:"+g.id, g.text)).join("");
+  if(!guides.length) h += '<div class="gline"><span style="color:var(--muted)">Nothing here yet. Add your own below.</span></div>';
+  if(gAdding) h += '<form class="gform" data-gadd="1"><input id="g-input" placeholder="New line" autocomplete="off" maxlength="160"><button class="btn" type="submit">Add</button><button class="btn ghost" type="button" data-gcancel="1">Cancel</button></form>';
+  h += '<div class="gfoot">'+(gAdding ? '<span></span>' : '<button class="linkbtn" type="button" data-gadd-open="1">+ Add your own</button>')+
+    (gResetAsk ? '<span><b>Reset?</b> <button class="linkbtn" type="button" data-greset="yes">Yes</button> <button class="linkbtn" type="button" data-greset="no">Cancel</button></span>'
+               : '<button class="linkbtn" type="button" data-greset="ask">Reset to starter tips</button>')+'</div></div></div>';
+  el.innerHTML = h; el.hidden = false;
+  const inp = document.getElementById("g-input"); if(inp){ inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+}
+function renderNow(){
+  const body = document.getElementById("now-body"), now = new Date(), evs = S.events.items || [];
+  const rows = nowItems().map((i, n) => {
+    const e = i.ev === "outing" ? null : evs.find(x => x.id === i.ev);
+    const days = e ? Math.max(0, Math.floor((new Date(e.end) - now) / 864e5)) : null;
+    return {i, n, e, days, color: e ? typeOf(e)[1] : ""};
+  }).sort((a, b) => (a.days === null) - (b.days === null) || (a.e && b.e ? new Date(a.e.end) - new Date(b.e.end) : 0) || a.n - b.n);
+  if(!rows.length){ body.innerHTML = '<div class="nowlist"><div class="nowline"><span style="color:var(--muted)">Nothing here yet. Tap 💡 on an event and + the steps you want.</span></div></div>'; return; }
+  body.innerHTML = '<div class="nowlist">'+rows.map(({i, e, days, color}) =>
+    '<div class="nowline">'+(e ? '<span class="dot" style="--c:'+color+'" title="'+esc(e.name)+': '+days+' day'+(days === 1 ? '' : 's')+' left">'+days+'</span>' : '<span class="dot plain" title="Checklist"></span>')+
+    '<span>'+esc(i.text)+'</span><button class="x" type="button" data-nowdone="'+esc(i.id)+'" aria-label="Done: '+esc(i.text)+'">×</button></div>').join("")+'</div>';
+}
+function showNowView(on){
+  document.getElementById("main-view").hidden = on; document.getElementById("now-view").hidden = !on;
+  document.getElementById("open-now").setAttribute("aria-pressed", on);
+  if(on) renderNow(); else renderEvents();
+  window.scrollTo(0, 0);
+}
+document.addEventListener("click", ev => {
+  const bg = document.getElementById("sheet");
+  if(ev.target === bg){ closeSheet(); return; }
+  const b = ev.target.closest("button"); if(!b) return;
+  if(b.id === "open-now"){ showNowView(document.getElementById("now-view").hidden); return; }
+  if(b.dataset.guide){ openSheet(b.dataset.guide); return; }
+  if(b.dataset.nowdone){ S.nowlist = {items: nowItems().filter(i => i.id !== b.dataset.nowdone)}; save("nowlist"); renderNow(); return; }
+  if(!sheetFor) return;
+  const c = sheetCtx();
+  if(b.dataset.sheetClose){ closeSheet(); renderEvents(); renderNow(); return; }
+  if(b.dataset.addnow){ addNow(c.evId, c.evName, b.dataset.addnow); if(c.ev) markSeen([c.evId]); renderSheet(); return; }
+  if(b.dataset.geditOpen){ gEdit = b.dataset.geditOpen; gAdding = false; renderSheet(); return; }
+  if(b.dataset.gcancel){ gEdit = null; gAdding = false; renderSheet(); return; }
+  if(b.dataset.gdel){
+    const k = b.dataset.gdel;
+    if(k.startsWith("b:")) setBonusEdit(c.evId, k.slice(2), "");
+    else setGuides(c.key, guidesOf(c.key).filter(g => g.id !== k.slice(2)));
+    renderSheet(); return;
+  }
+  if(b.dataset.gaddOpen){ gAdding = true; gEdit = null; renderSheet(); return; }
+  if(b.dataset.greset){ if(b.dataset.greset === "yes"){ resetGuides(c.key); gResetAsk = false; } else gResetAsk = b.dataset.greset === "ask"; renderSheet(); return; }
+});
+document.addEventListener("submit", ev => {
+  const f = ev.target; if(!sheetFor || !(f.dataset.gedit || f.dataset.gadd)) return;
+  ev.preventDefault(); ev.stopImmediatePropagation();
+  const c = sheetCtx(), text = document.getElementById("g-input").value.trim();
+  if(f.dataset.gedit && f.dataset.gedit.startsWith("b:")) setBonusEdit(c.evId, f.dataset.gedit.slice(2), text);
+  else {
+    const list = guidesOf(c.key).slice();
+    if(f.dataset.gedit){ const i = list.findIndex(g => g.id === f.dataset.gedit.slice(2)); if(i >= 0){ if(text) list[i] = {...list[i], text}; else list.splice(i, 1); } }
+    else if(text) list.push({id: gid(), text});
+    setGuides(c.key, list);
+  }
+  gEdit = null; gAdding = false; renderSheet();
+}, true);
+document.addEventListener("keydown", ev => { if(ev.key === "Escape" && sheetFor) closeSheet(); });
+
 const STAR = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"/></svg>';
 function evRow(e, now, mode){
   const [label, color] = typeOf(e), s = new Date(e.start), en = new Date(e.end);
@@ -434,7 +666,7 @@ function evRow(e, now, mode){
     : '<button class="note" type="button" data-note-edit="'+esc(e.id)+'" data-idx="'+i+'" aria-label="Edit note">'+esc(t)+'</button>').join("");
   if(ed) noteHtml += noteForm(e.id, -1, "");
   const name = (isNew(e) ? '<span class="new">New</span>' : '')+(e.link ? '<a href="'+esc(e.link)+'" target="_blank" rel="noopener">'+esc(e.name)+'</a>' : esc(e.name));
-  const acts = '<div class="acts"><button class="pen" type="button" data-note-edit="'+esc(e.id)+'" data-idx="-1" aria-pressed="'+ed+'" aria-label="Add a note to '+esc(e.name)+'" title="Add a note">'+PEN+'</button>'+
+  const acts = '<div class="acts"><button class="bulb'+(nowItems().some(i => i.ev === e.id) ? ' has' : '')+'" type="button" data-guide="'+esc(e.id)+'" aria-label="Game plan for '+esc(e.name)+'" title="Game plan">'+BULB+'</button><button class="pen" type="button" data-note-edit="'+esc(e.id)+'" data-idx="-1" aria-pressed="'+ed+'" aria-label="Add a note to '+esc(e.name)+'" title="Add a note">'+PEN+'</button>'+
     '<button class="star" type="button" data-star="'+esc(e.id)+'" aria-pressed="'+starred+'" aria-label="'+(starred?'Remove star from ':'Star ')+esc(e.name)+'" title="'+(starred?'Remove star':'Star')+'">'+STAR+'</button>'+
     '<button class="hide" type="button" data-hide="'+esc(e.id)+'"'+(starred && !hid ? ' disabled' : '')+' aria-label="'+(hid?'Bring back ':'Pass on ')+esc(e.name)+'" title="'+(hid?'Bring back':starred?'Remove the star first to pass on this event':'Pass on this event')+'">'+(hid?'↺':'×')+'</button></div>';
   const meta = '<div class="meta"><a class="chip" href="'+esc(e.link || "https://leekduck.com/events/")+'" target="_blank" rel="noopener">'+esc(label)+'</a>'+cpHtml(e)+when+'</div>';
@@ -502,6 +734,7 @@ function currentChecks(){
 function renderLists(){
 }
 function render(){
+  nowCount();
   document.getElementById("today-label").textContent = new Date().toLocaleDateString([], {weekday:"short", day:"numeric", month:"short"});
   renderEvents(); renderLists();
 }
@@ -596,8 +829,11 @@ function toItems(feed){
     const s = new Date(e.start), en = new Date(e.end);
     if(!(en > now) || s > until) continue;
     const link = e.link || "";
+    const x = e.extraData || {}, bonuses = [];
+    if(x.spotlight && x.spotlight.bonus) bonuses.push(x.spotlight.bonus);
+    if(x.communityday && x.communityday.bonuses) for(const b of x.communityday.bonuses) if(b.text) bonuses.push(b.text);
     out.push({ id: link.replace(/\/+$/,"").split("/").pop() || e.name, name: e.name, type: e.eventType || "event",
-      heading: e.heading || "", start: e.start, end: e.end, link });
+      heading: e.heading || "", start: e.start, end: e.end, link, bonuses });
   }
   return out;
 }
