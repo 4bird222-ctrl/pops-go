@@ -65,6 +65,9 @@ header h1{white-space:nowrap}
 .bulb svg{width:18px;height:18px}
 .bulb:hover{background:var(--sunk);color:var(--ink)}
 .bulb.has{color:#e0a800}
+.bulb{position:relative}
+.bulb.unseen::after{content:"";position:absolute;top:6px;right:4px;width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--surface)}
+.nbadge{position:absolute;top:-7px;right:-9px;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:#f2b705;color:#15212c;font:700 11px/19px var(--body);text-align:center;box-shadow:0 0 0 2px var(--bg)}
 /* Now list: plain text on white */
 .nowhead{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .nowlist{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px 0}
@@ -216,7 +219,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center}
       <h1>Pops Go</h1>
       <div class="date" id="today-label"></div>
     </div>
-    <button class="nowbtn" type="button" id="open-now" aria-pressed="true" aria-label="Show or hide my Now list">NOW</button>
+    <button class="nowbtn" type="button" id="open-now" aria-pressed="true" aria-label="Show or hide my Now list">NOW<span class="nbadge" id="new-badge" hidden></span></button>
   </header>
 
   <div id="main-view" hidden>
@@ -566,7 +569,7 @@ const BULB = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
 const TRASH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg>';
 
 let sheetFor = null, gEdit = null, gAdding = false; // sheetFor = event id or "outing"
-function openSheet(id){ sheetFor = id; gEdit = null; gAdding = false; renderSheet(); document.body.style.overflow = "hidden"; }
+function openSheet(id){ if(id !== "outing"){ markSeen([id]); updateNewBadge(); } sheetFor = id; gEdit = null; gAdding = false; renderSheet(); document.body.style.overflow = "hidden"; }
 function closeSheet(){ sheetFor = null; document.getElementById("sheet").hidden = true; document.body.style.overflow = ""; }
 function sheetCtx(){
   const ev = sheetFor === "outing" ? null : (S.events.items || []).find(e => e.id === sheetFor);
@@ -692,8 +695,8 @@ function evRow(e, now, mode){
   let noteHtml = notes.map((t, i) => ne && ne.idx === i ? noteForm(e.id, i, t)
     : '<button class="note" type="button" data-note-edit="'+esc(e.id)+'" data-idx="'+i+'" aria-label="Edit note">'+esc(t)+'</button>').join("");
   if(ed) noteHtml += noteForm(e.id, -1, "");
-  const name = (isNew(e) ? '<span class="new">New</span>' : '')+(e.link ? '<a href="'+esc(e.link)+'" target="_blank" rel="noopener">'+esc(e.name)+'</a>' : esc(e.name));
-  const acts = '<div class="acts"><button class="bulb'+(nowItems().some(i => i.ev === e.id) ? ' has' : '')+'" type="button" data-guide="'+esc(e.id)+'" aria-label="Game plan for '+esc(e.name)+'" title="Game plan">'+BULB+'</button>'+
+  const name = (e.link ? '<a href="'+esc(e.link)+'" target="_blank" rel="noopener">'+esc(e.name)+'</a>' : esc(e.name));
+  const acts = '<div class="acts"><button class="bulb'+(nowItems().some(i => i.ev === e.id) ? ' has' : '')+(isNew(e) ? ' unseen' : '')+'" type="button" data-guide="'+esc(e.id)+'" aria-label="'+(isNew(e) ? 'New, not reviewed yet. ' : '')+'Game plan for '+esc(e.name)+'" title="'+(isNew(e) ? 'New: tap to review' : 'Game plan')+'">'+BULB+'</button>'+
     '<button class="star" type="button" data-star="'+esc(e.id)+'" aria-pressed="'+starred+'" aria-label="'+(starred?'Remove star from ':'Star ')+esc(e.name)+'" title="'+(starred?'Remove star':'Star')+'">'+STAR+'</button>'+
     '<button class="hide" type="button" data-hide="'+esc(e.id)+'"'+(starred && !hid ? ' disabled' : '')+' aria-label="'+(hid?'Bring back ':'Pass on ')+esc(e.name)+'" title="'+(hid?'Bring back':starred?'Remove the star first to pass on this event':'Pass on this event')+'">'+(hid?'↺':'×')+'</button></div>';
   const meta = '<div class="meta"><a class="chip" href="'+esc(e.link || "https://leekduck.com/events/")+'" target="_blank" rel="noopener">'+esc(label)+'</a>'+cpHtml(e)+when+'</div>';
@@ -708,7 +711,14 @@ function renderEvents(){
   const ni2 = document.getElementById("note-input");
   if(ni2 && draft !== null){ ni2.value = draft; if(hadFocus) ni2.focus(); }
 }
+function updateNewBadge(){
+  const now = new Date(), horizon = new Date(+now + DAYS_AHEAD*864e5), hl = hiddenList();
+  const n = (S.events.items || []).filter(e => isNew(e) && !hl.includes(e.id) && new Date(e.end) > now && new Date(e.start) < horizon).length;
+  const b = document.getElementById("new-badge"); b.textContent = n; b.hidden = !n;
+  document.getElementById("open-now").setAttribute("aria-label", "Show or hide my Now list"+(n ? ". "+n+" new event"+(n === 1 ? "" : "s")+" to review" : ""));
+}
 function renderEventLists(){
+  updateNewBadge();
   const now = new Date(), horizon = new Date(+now + DAYS_AHEAD*864e5), hl = hiddenList();
   const items = (S.events.items || []).filter(e => e.start && e.end), isHid = e => hl.includes(e.id);
   for(const b of document.querySelectorAll("[data-now]")) b.setAttribute("aria-pressed", b.dataset.now === nowMode);
