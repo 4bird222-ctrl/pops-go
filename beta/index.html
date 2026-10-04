@@ -99,6 +99,7 @@ header h1{white-space:nowrap}
 .nowform input{flex:1 1 100%;min-width:0;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-family:var(--body)}
 .nowline .x{flex:none;border:0;background:none;color:var(--muted);cursor:pointer;width:34px;height:30px;border-radius:50%;font-size:20px;line-height:1}
 .nowline .x:hover{background:var(--sunk);color:var(--accent)}
+.nowline .x.armed,.nowline .x.armed:hover{background:var(--accent);color:var(--accent-ink)}
 .nowactions{display:flex;gap:8px;flex-wrap:wrap}
 /* guide sheet */
 .sheet-bg{position:fixed;inset:0;z-index:20;background:rgb(0 0 0 / .35);display:flex;align-items:flex-end;justify-content:center}
@@ -629,7 +630,7 @@ function renderSheet(){
     : '<div class="gline"><span>'+esc(text)+'</span>'+addBtn(text)+
       '<button class="gbtn" type="button" data-gedit-open="'+esc(key)+'" aria-label="Edit">'+PEN+'</button>'+
       '<button class="gbtn" type="button" data-gdel="'+esc(key)+'" aria-label="Delete">'+TRASH+'</button></div>';
-  let h = '<div class="sheet" role="dialog" aria-modal="true" aria-label="Tips"><div class="sheet-top"><h2>💡 '+esc(c.evName)+' <span class="tipslbl">Tips</span></h2>'+
+  let h = '<div class="sheet" role="dialog" aria-modal="true" aria-label="Tips"><div class="sheet-top"><h2>💡 '+esc(c.evName)+'</h2>'+
     '<button class="btn ghost small" type="button" data-sheet-close="1">Done</button></div>';
   const bonus = c.ev ? bonusesOf(c.ev) : [], guides = guidesOf(c.key);
   const taken = new Set(bonus.map(b => b.text).concat(guides.map(g => g.text)));
@@ -669,7 +670,7 @@ function renderNow(){
   body.innerHTML = main.length ? '<div class="nowlist">'+main.map(line).join("")+'</div>'
     : '<div class="nowlist"><div class="nowline"><span style="color:var(--muted)">Nothing here yet. Tap 💡 on an event and + the steps you want.</span></div></div>';
   upBox.innerHTML = later.length
-    ? '<details class="nowup" id="nowup-d"'+(lsGet("nowUpOpen") ? ' open' : '')+'><summary>Upcoming Events <span class="nowup-n">'+later.length+'</span></summary><div class="nowlist">'+later.map(line).join("")+'</div></details>'
+    ? '<details class="nowup" id="nowup-d"'+(lsGet("nowUpOpen") ? ' open' : '')+'><summary>Upcoming <span class="nowup-n">'+later.length+'</span></summary><div class="nowlist">'+later.map(line).join("")+'</div></details>'
     : '';
 }
 function showNowView(on){
@@ -692,7 +693,15 @@ document.addEventListener("click", ev => {
   if(b.id === "open-now"){ showNowView(document.getElementById("now-view").hidden); return; }
   if(b.dataset.guide){ openSheet(b.dataset.guide); return; }
   if(b.dataset.nowcancel){ nowEdit = null; renderNow(); return; }
-  if(b.dataset.nowdone){ S.nowlist = {items: nowItems().filter(i => i.id !== b.dataset.nowdone)}; save("nowlist"); renderNow(); return; }
+  if(b.dataset.nowdone){
+    if(!b.classList.contains("armed")){
+      document.querySelectorAll(".nowline .x.armed").forEach(x => x.classList.remove("armed"));
+      b.classList.add("armed"); b.setAttribute("aria-label", "Tap again to remove");
+      clearTimeout(b._t); b._t = setTimeout(() => b.classList.remove("armed"), 3000);
+      return;
+    }
+    S.nowlist = {items: nowItems().filter(i => i.id !== b.dataset.nowdone)}; save("nowlist"); renderNow(); return;
+  }
   if(!sheetFor) return;
   const c = sheetCtx();
   if(b.dataset.sheetClose){ closeSheet(); renderEvents(); renderNow(); return; }
