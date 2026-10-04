@@ -69,6 +69,13 @@ header h1{white-space:nowrap}
 .bulb{position:relative}
 .bulb.unseen::after{content:"";position:absolute;top:6px;right:4px;width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--surface)}
 .newdot{position:absolute;top:calc(env(safe-area-inset-top,0px) + 36px);transform:translateY(-50%);width:30px;height:30px;padding:0;border:0;background:none;cursor:pointer;display:grid;place-items:center}
+.nowup{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.nowup > summary{cursor:pointer;padding:12px 14px;font:600 15px var(--display);display:flex;align-items:center;gap:8px;list-style:none}
+.nowup > summary::-webkit-details-marker{display:none}
+.nowup > summary::before{content:"▸";color:var(--muted);transition:transform .15s}
+.nowup[open] > summary::before{transform:rotate(90deg)}
+.nowup-n{min-width:22px;padding:0 7px;border-radius:999px;background:var(--sunk);color:var(--muted);font:600 12px/22px var(--body);text-align:center}
+.nowup .nowlist{border:0;border-top:1px solid var(--line);border-radius:0 0 14px 14px}
 .tipslbl{color:var(--muted);font-weight:500}
 .addcard{padding:2px 0}
 .addrow2{display:flex;flex-wrap:wrap;gap:4px 18px;padding:8px 12px}
@@ -270,6 +277,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center}
     <div class="nowactions">
       <button class="btn ghost" type="button" data-guide="outing">💡 Checklist</button>
     </div>
+    <div id="now-upcoming"></div>
   </section>
 </div>
 <div class="sheet-bg" id="sheet" hidden></div>
@@ -417,6 +425,7 @@ async function loadResearch(){
   for(const id of Object.keys(R)) if(!items.some(e => e.id === id)) delete R[id];
   lsSet("research", R); rLoading = false;
 }
+document.addEventListener("toggle", ev => { if(ev.target.id === "nowup-d") lsSet("nowUpOpen", ev.target.open); }, true);
 document.addEventListener("toggle", ev => {
   const d = ev.target; if(!d.dataset || !d.dataset.rid) return;
   rOpen[d.dataset.rid] = d.open; lsSet("ropen", rOpen);
@@ -629,21 +638,27 @@ function renderSheet(){
 }
 let nowEdit = null;
 function renderNow(){
-  const body = document.getElementById("now-body"), now = new Date(), evs = S.events.items || [];
+  const body = document.getElementById("now-body"), upBox = document.getElementById("now-upcoming"), now = new Date(), evs = S.events.items || [];
   const rows = nowItems().map((i, n) => {
     const e = i.ev === "outing" ? null : evs.find(x => x.id === i.ev);
     // On now: filled dot, days until it ends. Not started yet: outlined dot, days until it starts.
     const soon = !!e && new Date(e.start) > now;
     const days = e ? Math.max(0, Math.floor((new Date(soon ? e.start : e.end) - now) / 864e5)) : null;
-    const rank = !e ? 2 : soon ? 1 : 0, at = e ? +new Date(soon ? e.start : e.end) : 0;
+    const rank = !e ? 1 : 0, at = e ? +new Date(soon ? e.start : e.end) : 0;
     return {i, n, e, days, soon, rank, at, color: e ? typeOf(e)[1] : ""};
   }).sort((a, b) => a.rank - b.rank || a.at - b.at || a.n - b.n);
-  if(!rows.length){ body.innerHTML = '<div class="nowlist"><div class="nowline"><span style="color:var(--muted)">Nothing here yet. Tap 💡 on an event and + the steps you want.</span></div></div>'; return; }
-  body.innerHTML = '<div class="nowlist">'+rows.map(({i, e, days, soon, color}) =>
+  const line = ({i, e, days, soon, color}) =>
     '<div class="nowline">'+(e ? '<span class="dot'+(soon ? ' soon' : '')+'" style="--c:'+color+'" title="'+esc(e.name)+': '+(soon ? 'starts in ' : '')+days+' day'+(days === 1 ? '' : 's')+(soon ? '' : ' left')+'">'+days+'</span>' : '<span class="dot plain" title="Checklist"></span>')+
     (nowEdit === i.id
       ? '<form class="nowform" data-nowedit="'+esc(i.id)+'"><input id="now-input" value="'+esc(i.text)+'" autocomplete="off" maxlength="160"><button class="btn small" type="submit">Save</button><button class="btn ghost small" type="button" data-nowcancel="1">Cancel</button></form>'
-      : '<span class="nowtext" data-nowtext="'+esc(i.id)+'">'+esc(i.text)+'</span>')+'<button class="x" type="button" data-nowdone="'+esc(i.id)+'" aria-label="Done: '+esc(i.text)+'">×</button></div>').join("")+'</div>';
+      : '<span class="nowtext" data-nowtext="'+esc(i.id)+'">'+esc(i.text)+'</span>')+'<button class="x" type="button" data-nowdone="'+esc(i.id)+'" aria-label="Done: '+esc(i.text)+'">×</button></div>';
+  // events happening now and the checklist stay on the page; tips for events that haven't started fold away at the bottom
+  const main = rows.filter(r => !r.soon), later = rows.filter(r => r.soon).sort((a, b) => a.at - b.at || a.n - b.n);
+  body.innerHTML = main.length ? '<div class="nowlist">'+main.map(line).join("")+'</div>'
+    : '<div class="nowlist"><div class="nowline"><span style="color:var(--muted)">Nothing here yet. Tap 💡 on an event and + the steps you want.</span></div></div>';
+  upBox.innerHTML = later.length
+    ? '<details class="nowup" id="nowup-d"'+(lsGet("nowUpOpen") ? ' open' : '')+'><summary>Upcoming Events <span class="nowup-n">'+later.length+'</span></summary><div class="nowlist">'+later.map(line).join("")+'</div></details>'
+    : '';
 }
 function showNowView(on){
   document.getElementById("main-view").hidden = on; document.getElementById("now-view").hidden = !on;
