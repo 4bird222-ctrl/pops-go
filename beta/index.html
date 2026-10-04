@@ -482,13 +482,16 @@ function bosses(e){
   const out = [], seen = new Set();
   for(let part of n.split(/,\s*(?:and\s+)?|\s+and\s+/)){
     part = part.trim(); if(!part) continue;
+    const label = part.replace(/\s*\(([^)]+?)\s+Forme?\)\s*$/i, " ($1)");
     let form = "", m = /\(([^)]+?)(?:\s+Forme?)?\)\s*$/i.exec(part);
     if(m){ form = m[1]; part = part.slice(0, m.index).trim(); }
     part = part.replace(/^(Shadow|Mega|Primal|Dynamax|Gigantamax)\s+/i, "").replace(/\s+[XY]$/, "");
     const reg = /^(Alolan|Galarian|Hisuian|Paldean)\s+/.exec(part);
     if(reg){ form = REGIONAL[reg[1]]; part = part.slice(reg[0].length); }
-    const key = part+"|"+form; if(seen.has(key)) continue; seen.add(key);
-    out.push({name: part, form});
+    const key = part+"|"+form;
+    if(seen.has(key)){ const o = out.find(x => x.key === key); if(o && /\s[XY]$/.test(o.label)) o.label = o.label.replace(/\s[XY]$/, " X/Y"); continue; }
+    seen.add(key);
+    out.push({name: part, form, label, key});
   }
   return out;
 }
@@ -581,10 +584,19 @@ function setBonusEdit(id, orig, text){
   all[id] = {...(all[id] || {}), [orig]: text};
   S.guides = {...S.guides, bonus: all}; save("guides");
 }
+function autoTipsOf(e){
+  // lines Pops Go fills in for an event: raid hundo CPs, then Leek Duck's bonuses
+  const list = [];
+  if(RAID_TYPES.has(e.type)) for(const b of bosses(e)){ const cp = hundo(b); if(cp) list.push(b.label+" CP"+cp[0]+" WB"+cp[1]); }
+  const raw = [...new Set((e.bonuses || []).concat((R[e.id] && R[e.id].bonuses) || []))];
+  const spot = e.type === "pokemon-spotlight-hour" ? e.name.replace(/\s*Spotlight Hour.*$/i, "").trim() : "";
+  for(const b of raw) list.push(spot ? "Spotlight "+spot+": "+b.replace(/\*+/g, "").trim() : tipForBonus(b));
+  return [...new Set(list)];
+}
 function bonusesOf(e){
   // [{orig, text}] after your edits; deleted ones are left out
-  const raw = [...new Set((e.bonuses || []).concat((R[e.id] && R[e.id].bonuses) || []))], ed = bonusEdits(e.id);
-  return raw.map(b => { const orig = tipForBonus(b); return {orig, text: orig in ed ? ed[orig] : orig}; }).filter(x => x.text);
+  const ed = bonusEdits(e.id);
+  return autoTipsOf(e).map(orig => ({orig, text: orig in ed ? ed[orig] : orig})).filter(x => x.text);
 }
 const nowItems = () => (S.nowlist && S.nowlist.items) || [];
 const inNow = (ev, text) => nowItems().some(i => i.ev === ev && i.text === text);
