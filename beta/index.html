@@ -69,6 +69,11 @@ header h1{white-space:nowrap}
 .bulb{position:relative}
 .bulb.unseen::after{content:"";position:absolute;top:6px;right:4px;width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--surface)}
 .newdot{position:absolute;top:calc(env(safe-area-inset-top,0px) + 36px);transform:translateY(-50%);width:30px;height:30px;padding:0;border:0;background:none;cursor:pointer;display:grid;place-items:center}
+.tickhud{position:fixed;left:50%;top:50%;z-index:40;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:24px;background:rgb(21 33 44 / .82);display:grid;place-items:center;pointer-events:none;opacity:0;transform:scale(.9);transition:opacity .18s,transform .18s}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.tickhud.show{opacity:1;transform:scale(1)}
+.tickhud svg{width:64px;height:64px}
+@media (prefers-reduced-motion:reduce){.tickhud{transition:none}}
 .newdot::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--accent)}
 /* Now list: plain text on white */
 .nowhead{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -267,6 +272,8 @@ footer{color:var(--muted);font-size:12.5px;text-align:center}
   </section>
 </div>
 <div class="sheet-bg" id="sheet" hidden></div>
+<div class="tickhud" id="tickhud" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="square" stroke-linejoin="miter"><polyline points="4.5 12.5 9.5 17.5 19.5 6.5"/></svg></div>
+<div id="announce" class="sr" aria-live="polite"></div>
 
 <script>
 const DAYS_AHEAD = 14; // fetch, show and check research for events starting within this many days
@@ -573,6 +580,13 @@ function nowCount(){}
 const BULB = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1.1 2V16h5v-.2c.1-.8.5-1.5 1.1-2A6 6 0 0 0 12 3z"/></svg>';
 const TRASH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg>';
 
+let tickTimer = null;
+function flashTick(msg){
+  const t = document.getElementById("tickhud");
+  t.classList.add("show"); clearTimeout(tickTimer);
+  tickTimer = setTimeout(() => t.classList.remove("show"), 900);
+  document.getElementById("announce").textContent = msg || "Added to Now";
+}
 let sheetFor = null, gEdit = null, gAdding = false; // sheetFor = event id or "outing"
 function openSheet(id){ if(id !== "outing"){ markSeen([id]); updateNewBadge(); } sheetFor = id; gEdit = null; gAdding = false; renderSheet(); document.body.style.overflow = "hidden"; }
 function closeSheet(){ sheetFor = null; document.getElementById("sheet").hidden = true; document.body.style.overflow = ""; }
@@ -666,7 +680,7 @@ document.addEventListener("submit", ev => {
   const f = ev.target; if(!sheetFor || !(f.dataset.gedit || f.dataset.gadd)) return;
   ev.preventDefault(); ev.stopImmediatePropagation();
   const c = sheetCtx(), text = document.getElementById("g-input").value.trim();
-  if(f.dataset.gadd === "event"){ if(text){ addNow(c.evId, c.evName, text); markSeen([c.evId]); } }
+  if(f.dataset.gadd === "event"){ if(text){ addNow(c.evId, c.evName, text); markSeen([c.evId]); flashTick(); } }
   else if(f.dataset.gedit && f.dataset.gedit.startsWith("b:")) setBonusEdit(c.evId, f.dataset.gedit.slice(2), text);
   else {
     const list = guidesOf(c.key).slice();
