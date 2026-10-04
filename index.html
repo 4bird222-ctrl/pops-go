@@ -56,7 +56,7 @@ header{display:flex;align-items:center;gap:16px}
 header .who{flex:1;min-width:0}
 header .date{color:var(--muted);font-size:13.5px}
 .beta{display:inline-block;vertical-align:6px;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--sunk);color:var(--muted);font:600 11px/1.5 var(--body);letter-spacing:.6px;text-transform:uppercase}
-header{position:sticky;top:0;z-index:15;background:var(--bg);margin-inline:-16px;padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 10px;transition:box-shadow .2s}
+header{position:sticky;top:0;z-index:15;background:var(--bg);margin-inline:-16px;padding:calc(env(safe-area-inset-top,0px) + 14px) 29px 10px;transition:box-shadow .2s}
 header.stuck{box-shadow:0 1px 0 var(--line),0 4px 12px rgb(0 0 0 / .06)}
 header h1{white-space:nowrap}
 .nowbtn{position:absolute;right:16px;top:calc(env(safe-area-inset-top,0px) + 36px);transform:translateY(-50%);width:44px;height:44px;padding:0;border:0;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);cursor:pointer}
@@ -85,6 +85,7 @@ header h1{white-space:nowrap}
 .addlink{display:inline-flex;align-items:center;gap:8px;border:0;background:none;padding:6px 2px;color:var(--ink);font:500 15px var(--body);cursor:pointer}
 .addlink svg{width:22px;height:22px;color:var(--ok)}
 .addcard .gform{border-top:0}
+textarea.grow{resize:none;overflow:hidden;line-height:1.4;font-family:var(--body);display:block}
 .newdot::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--accent)}
 /* Now list: plain text on white */
 .nowhead{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -99,7 +100,7 @@ header h1{white-space:nowrap}
 .nowline > span:not(.dot){flex:1;min-width:0;overflow-wrap:anywhere}
 .nowtext{cursor:text}
 .nowform{flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:6px}
-.nowform input{flex:1 1 100%;min-width:0;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-family:var(--body)}
+.nowform input,.nowform textarea{flex:1 1 100%;min-width:0;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-family:var(--body)}
 .nowline .x{flex:none;border:0;background:none;color:var(--muted);cursor:pointer;width:34px;height:30px;border-radius:50%;font-size:20px;line-height:1}
 .nowline .x:hover{background:var(--sunk);color:var(--accent)}
 .nowline .x.armed,.nowline .x.armed:hover{background:var(--accent);color:var(--accent-ink)}
@@ -121,7 +122,7 @@ header h1{white-space:nowrap}
 .gbtn.added{color:var(--ok);font-size:17px;cursor:default}
 .gbtn svg{width:16px;height:16px}
 .gform{display:flex;gap:6px;flex-wrap:wrap;padding:8px 10px 8px 14px;border-top:1px solid var(--line)}
-.gform input{flex:1 1 100%;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-family:var(--body)}
+.gform input,.gform textarea{flex:1 1 100%;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-family:var(--body)}
 .gfoot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 10px 6px 14px;border-top:1px solid var(--line)}
 
 .section{display:flex;flex-direction:column;gap:10px}
@@ -576,6 +577,12 @@ function tipForBonus(raw){
   if(/raid pass/.test(t)) return "Raid Passes: "+b;
   return b;
 }
+function fitBox(t){ t.style.height = "auto"; t.style.height = t.scrollHeight + 2 + "px"; }
+document.addEventListener("input", ev => { if(ev.target.matches && ev.target.matches("textarea.grow")) fitBox(ev.target); });
+// Return saves (the text never needs line breaks)
+document.addEventListener("keydown", ev => {
+  if(ev.key === "Enter" && !ev.shiftKey && ev.target.matches && ev.target.matches("textarea.grow")){ ev.preventDefault(); ev.target.form && ev.target.form.requestSubmit(); }
+});
 const evTipsOf = id => (S.guides && S.guides.evtips && S.guides.evtips[id]) || [];
 function setEvTips(id, list){
   const all = {...((S.guides && S.guides.evtips) || {})};
@@ -629,7 +636,7 @@ function renderSheet(){
     ? '<button class="gbtn added" type="button" disabled aria-label="On your Now list">✓</button>'
     : '<button class="gbtn add" type="button" data-addnow="'+esc(text)+'" aria-label="Add to Now: '+esc(text)+'">+</button>';
   const line = (key, text) => gEdit === key
-    ? '<form class="gform" data-gedit="'+esc(key)+'"><input id="g-input" value="'+esc(text)+'" autocomplete="off" maxlength="160"><button class="btn" type="submit">Save</button><button class="btn ghost" type="button" data-gcancel="1">Cancel</button></form>'
+    ? '<form class="gform" data-gedit="'+esc(key)+'"><textarea id="g-input" class="grow" rows="1" autocomplete="off" maxlength="400">'+esc(text)+'</textarea><button class="btn" type="submit">Save</button><button class="btn ghost" type="button" data-gcancel="1">Cancel</button></form>'
     : '<div class="gline"><span>'+esc(text)+'</span>'+addBtn(text)+
       '<button class="gbtn" type="button" data-gedit-open="'+esc(key)+'" aria-label="Edit">'+PEN+'</button>'+
       '<button class="gbtn" type="button" data-gdel="'+esc(key)+'" aria-label="Delete">'+TRASH+'</button></div>';
@@ -644,13 +651,13 @@ function renderSheet(){
   if(guides.length) h += '<div class="gcard">'+guides.map(g => line("g:"+g.id, g.text)).join("")+'</div>';
   h += '<div class="gcard addcard">';
   const allName = {raids: "All raids", max: "All Max Battles", cday: "All Community Days", spot: "All Spotlight Hours", gbl: "All GO Battle League", event: "All general events"}[c.key] || "All events like this";
-  if(gAdding) h += '<form class="gform" data-gadd="'+gAdding+'"><input id="g-input" placeholder="'+(gAdding === "event" ? "Tip for this event only" : c.ev ? esc(allName.replace(/^All /, "Tip for all ")) : "New checklist line")+'" autocomplete="off" maxlength="160"><button class="btn" type="submit">Add</button><button class="btn ghost" type="button" data-gcancel="1">Cancel</button></form>';
+  if(gAdding) h += '<form class="gform" data-gadd="'+gAdding+'"><textarea id="g-input" class="grow" rows="1" placeholder="'+(gAdding === "event" ? "Tip for this event only" : c.ev ? esc(allName.replace(/^All /, "Tip for all ")) : "New checklist line")+'" autocomplete="off" maxlength="400"></textarea><button class="btn" type="submit">Add</button><button class="btn ghost" type="button" data-gcancel="1">Cancel</button></form>';
   else h += '<div class="addrow2">'+(c.ev
       ? '<button class="addlink" type="button" data-gadd-open="event">'+PLUSC+'This event only</button><button class="addlink" type="button" data-gadd-open="guide">'+PLUSC+esc(allName)+'</button>'
       : '<button class="addlink" type="button" data-gadd-open="guide">'+PLUSC+'Add your own</button>')+'</div>';
   h += '</div></div>';
   el.innerHTML = h; el.hidden = false;
-  const inp = document.getElementById("g-input"); if(inp){ inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+  const inp = document.getElementById("g-input"); if(inp){ fitBox(inp); inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
 }
 let nowEdit = null;
 function renderNow(){
@@ -666,7 +673,7 @@ function renderNow(){
   const line = ({i, e, days, soon, color}) =>
     '<div class="nowline">'+(e ? '<span class="dot'+(soon ? ' soon' : '')+'" style="--c:'+color+'" title="'+esc(e.name)+': '+(soon ? 'starts in ' : '')+days+' day'+(days === 1 ? '' : 's')+(soon ? '' : ' left')+'">'+days+'</span>' : '<span class="dot plain" title="Checklist"></span>')+
     (nowEdit === i.id
-      ? '<form class="nowform" data-nowedit="'+esc(i.id)+'"><input id="now-input" value="'+esc(i.text)+'" autocomplete="off" maxlength="160"><button class="btn small" type="submit">Save</button><button class="btn ghost small" type="button" data-nowcancel="1">Cancel</button></form>'
+      ? '<form class="nowform" data-nowedit="'+esc(i.id)+'"><textarea id="now-input" class="grow" rows="1" autocomplete="off" maxlength="400">'+esc(i.text)+'</textarea><button class="btn small" type="submit">Save</button><button class="btn ghost small" type="button" data-nowcancel="1">Cancel</button></form>'
       : '<span class="nowtext" data-nowtext="'+esc(i.id)+'">'+esc(i.text)+'</span>')+'<button class="x" type="button" data-nowdone="'+esc(i.id)+'" aria-label="Done: '+esc(i.text)+'">×</button></div>';
   // events happening now and the checklist stay on the page; tips for events that haven't started fold away at the bottom
   const main = rows.filter(r => !r.soon), later = rows.filter(r => r.soon).sort((a, b) => a.at - b.at || a.n - b.n);
@@ -724,7 +731,7 @@ document.addEventListener("click", ev => {
 document.addEventListener("submit", ev => {
   const f = ev.target; if(!sheetFor || !(f.dataset.gedit || f.dataset.gadd)) return;
   ev.preventDefault(); ev.stopImmediatePropagation();
-  const c = sheetCtx(), text = document.getElementById("g-input").value.trim();
+  const c = sheetCtx(), text = document.getElementById("g-input").value.replace(/\s*\n\s*/g, " ").trim();
   if(f.dataset.gadd === "event"){ if(text){ setEvTips(c.evId, evTipsOf(c.evId).concat({id: gid(), text})); addNow(c.evId, c.evName, text); markSeen([c.evId]); } }
   else if(f.dataset.gedit && f.dataset.gedit.startsWith("e:")){
     const id = f.dataset.gedit.slice(2), old = (evTipsOf(c.evId).find(t => t.id === id) || {}).text;
@@ -744,12 +751,12 @@ document.addEventListener("keydown", ev => { if(ev.key === "Escape" && sheetFor)
 document.addEventListener("click", ev => {
   const t = ev.target.closest("[data-nowtext]"); if(!t) return;
   nowEdit = t.dataset.nowtext; renderNow();
-  const inp = document.getElementById("now-input"); if(inp){ inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+  const inp = document.getElementById("now-input"); if(inp){ fitBox(inp); inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
 });
 document.addEventListener("submit", ev => {
   const f = ev.target; if(!f.dataset.nowedit) return;
   ev.preventDefault(); ev.stopImmediatePropagation();
-  const text = document.getElementById("now-input").value.trim();
+  const text = document.getElementById("now-input").value.replace(/\s*\n\s*/g, " ").trim();
   S.nowlist = {items: text ? nowItems().map(i => i.id === f.dataset.nowedit ? {...i, text} : i) : nowItems().filter(i => i.id !== f.dataset.nowedit)};
   save("nowlist"); nowEdit = null; renderNow();
 }, true);
@@ -848,19 +855,14 @@ function currentChecks(){
 function renderLists(){
 }
 function alignNow(){
-  const btn = document.getElementById("open-now"), fav = document.querySelector('[data-now="star"]'), main = document.getElementById("main-view");
-  if(!btn || !fav) return;
-  const wasHidden = main.hidden; main.hidden = false;
-  const f = fav.getBoundingClientRect(), hd = btn.parentElement.getBoundingClientRect();
-  main.hidden = wasHidden;
-  if(!f.width) return;
-  btn.style.right = "auto";
-  const left = Math.min(hd.width - btn.offsetWidth, f.left + f.width / 2 - hd.left - btn.offsetWidth / 2 + 14);
-  btn.style.left = left+"px";
-  const lg = document.querySelector(".logo").getBoundingClientRect(), mid = (lg.top + lg.height / 2 - hd.top)+"px";
-  btn.style.top = mid; document.getElementById("open-new").style.top = mid;
-  const nb = document.getElementById("open-new");
-  nb.style.left = (left - 30)+"px";
+  // chevron sits as far in from the right as the logo is from the left; the new-events dot sits just before it
+  const btn = document.getElementById("open-now"), hd = btn && btn.parentElement;
+  if(!btn) return;
+  const pad = parseFloat(getComputedStyle(hd).paddingLeft) || 29, left = hd.clientWidth - pad - btn.offsetWidth;
+  btn.style.right = "auto"; btn.style.left = left+"px";
+  const lg = document.querySelector(".logo").getBoundingClientRect(), mid = (lg.top + lg.height / 2 - hd.getBoundingClientRect().top)+"px";
+  btn.style.top = mid;
+  const nb = document.getElementById("open-new"); nb.style.top = mid; nb.style.left = (left - 30)+"px";
 }
 window.addEventListener("resize", alignNow);
 window.addEventListener("scroll", () => document.querySelector("header").classList.toggle("stuck", window.scrollY > 4), {passive: true});
