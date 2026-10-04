@@ -56,7 +56,7 @@ header{display:flex;align-items:center;gap:16px}
 header .who{flex:1;min-width:0}
 header .date{color:var(--muted);font-size:13.5px}
 .beta{display:inline-block;vertical-align:6px;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--sunk);color:var(--muted);font:600 11px/1.5 var(--body);letter-spacing:.6px;text-transform:uppercase}
-header{position:sticky;top:0;z-index:15;background:var(--bg);margin-inline:-16px;padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 10px;transition:box-shadow .2s}
+header{position:sticky;top:0;z-index:15;background:var(--bg);margin-inline:-16px;padding:calc(env(safe-area-inset-top,0px) + 14px) 29px 10px;transition:box-shadow .2s}
 header.stuck{box-shadow:0 1px 0 var(--line),0 4px 12px rgb(0 0 0 / .06)}
 header h1{white-space:nowrap}
 .nowbtn{position:absolute;right:16px;top:calc(env(safe-area-inset-top,0px) + 36px);transform:translateY(-50%);width:44px;height:44px;padding:0;border:0;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);cursor:pointer}
@@ -848,19 +848,14 @@ function currentChecks(){
 function renderLists(){
 }
 function alignNow(){
-  const btn = document.getElementById("open-now"), fav = document.querySelector('[data-now="star"]'), main = document.getElementById("main-view");
-  if(!btn || !fav) return;
-  const wasHidden = main.hidden; main.hidden = false;
-  const f = fav.getBoundingClientRect(), hd = btn.parentElement.getBoundingClientRect();
-  main.hidden = wasHidden;
-  if(!f.width) return;
-  btn.style.right = "auto";
-  const left = Math.min(hd.width - btn.offsetWidth, f.left + f.width / 2 - hd.left - btn.offsetWidth / 2 + 14);
-  btn.style.left = left+"px";
-  const lg = document.querySelector(".logo").getBoundingClientRect(), mid = (lg.top + lg.height / 2 - hd.top)+"px";
-  btn.style.top = mid; document.getElementById("open-new").style.top = mid;
-  const nb = document.getElementById("open-new");
-  nb.style.left = (left - 30)+"px";
+  // chevron sits as far in from the right as the logo is from the left; the new-events dot sits just before it
+  const btn = document.getElementById("open-now"), hd = btn && btn.parentElement;
+  if(!btn) return;
+  const pad = parseFloat(getComputedStyle(hd).paddingLeft) || 29, left = hd.clientWidth - pad - btn.offsetWidth;
+  btn.style.right = "auto"; btn.style.left = left+"px";
+  const lg = document.querySelector(".logo").getBoundingClientRect(), mid = (lg.top + lg.height / 2 - hd.getBoundingClientRect().top)+"px";
+  btn.style.top = mid;
+  const nb = document.getElementById("open-new"); nb.style.top = mid; nb.style.left = (left - 30)+"px";
 }
 window.addEventListener("resize", alignNow);
 window.addEventListener("scroll", () => document.querySelector("header").classList.toggle("stuck", window.scrollY > 4), {passive: true});
