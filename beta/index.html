@@ -59,9 +59,12 @@ header .date{color:var(--muted);font-size:13.5px}
 header{position:sticky;top:0;z-index:15;background:var(--bg);margin-inline:-16px;padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 10px;transition:box-shadow .2s}
 header.stuck{box-shadow:0 1px 0 var(--line),0 4px 12px rgb(0 0 0 / .06)}
 header h1{white-space:nowrap}
-.nowbtn{position:absolute;right:16px;top:calc(env(safe-area-inset-top,0px) + 36px);transform:translateY(-50%);display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 13px var(--display);cursor:pointer}
-.nowbtn{letter-spacing:.8px}
-.nowbtn[aria-pressed="false"]{background:var(--surface);color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
+.nowbtn{position:absolute;right:16px;top:calc(env(safe-area-inset-top,0px) + 36px);transform:translateY(-50%);width:44px;height:44px;padding:0;border:0;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);cursor:pointer}
+.nowbtn svg{width:22px;height:22px}
+.nowbtn[aria-pressed="false"]{background:var(--surface);color:var(--accent);box-shadow:inset 0 0 0 2.5px var(--accent)}
+.nowbtn .back{display:none}
+.nowbtn[aria-pressed="false"] .fwd{display:none}
+.nowbtn[aria-pressed="false"] .back{display:block}
 .bulb{border:0;background:none;cursor:pointer;width:32px;height:36px;display:grid;place-items:center;border-radius:50%;color:var(--muted)}
 .bulb svg{width:18px;height:18px}
 .bulb:hover{background:var(--sunk);color:var(--ink)}
@@ -235,7 +238,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center}
       <h1>Pops Go</h1>
       <div class="date" id="today-label"></div>
     </div>
-    <button class="nowbtn" type="button" id="open-now" aria-pressed="true" aria-label="Show or hide my Now list">NOW</button>
+    <button class="nowbtn" type="button" id="open-now" aria-pressed="true" aria-label="Show events"><svg class="fwd" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="square" stroke-linejoin="miter"><polyline points="9 5 16 12 9 19"/></svg><svg class="back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="square" stroke-linejoin="miter"><polyline points="15 5 8 12 15 19"/></svg></button>
     <button class="newdot" type="button" id="open-new" hidden aria-label="New events to review" title="New events to review"></button>
   </header>
 
@@ -676,6 +679,7 @@ function renderNow(){
 function showNowView(on){
   document.getElementById("main-view").hidden = on; document.getElementById("now-view").hidden = !on;
   document.getElementById("open-now").setAttribute("aria-pressed", on);
+  document.getElementById("open-now").setAttribute("aria-label", on ? "Show events" : "Back to my Now list");
   if(on) renderNow(); else renderEvents();
   window.scrollTo(0, 0);
 }
