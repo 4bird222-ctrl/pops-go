@@ -69,11 +69,19 @@ header h1{white-space:nowrap}
 .bulb{position:relative}
 .bulb.unseen::after{content:"";position:absolute;top:6px;right:4px;width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--surface)}
 .newdot{position:absolute;top:calc(env(safe-area-inset-top,0px) + 36px);transform:translateY(-50%);width:30px;height:30px;padding:0;border:0;background:none;cursor:pointer;display:grid;place-items:center}
-.tickhud{position:fixed;left:50%;top:50%;z-index:40;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:24px;background:rgb(21 33 44 / .82);display:grid;place-items:center;pointer-events:none;opacity:0;transform:scale(.9);transition:opacity .18s,transform .18s}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-.tickhud.show{opacity:1;transform:scale(1)}
-.tickhud svg{width:64px;height:64px}
-@media (prefers-reduced-motion:reduce){.tickhud{transition:none}}
+.nowup{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.nowup > summary{cursor:pointer;padding:12px 14px;font:600 15px var(--display);display:flex;align-items:center;gap:8px;list-style:none}
+.nowup > summary::-webkit-details-marker{display:none}
+.nowup > summary::before{content:"▸";color:var(--muted);transition:transform .15s}
+.nowup[open] > summary::before{transform:rotate(90deg)}
+.nowup-n{min-width:22px;padding:0 7px;border-radius:999px;background:var(--sunk);color:var(--muted);font:600 12px/22px var(--body);text-align:center}
+.nowup .nowlist{border:0;border-top:1px solid var(--line);border-radius:0 0 14px 14px}
+.tipslbl{color:var(--muted);font-weight:500}
+.addcard{padding:2px 0}
+.addrow2{display:flex;flex-wrap:wrap;gap:4px 18px;padding:8px 12px}
+.addlink{display:inline-flex;align-items:center;gap:8px;border:0;background:none;padding:6px 2px;color:var(--ink);font:500 15px var(--body);cursor:pointer}
+.addlink svg{width:22px;height:22px;color:var(--ok)}
+.addcard .gform{border-top:0}
 .newdot::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--accent)}
 /* Now list: plain text on white */
 .nowhead{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -269,11 +277,11 @@ footer{color:var(--muted);font-size:12.5px;text-align:center}
     <div class="nowactions">
       <button class="btn ghost" type="button" data-guide="outing">💡 Checklist</button>
     </div>
+    <div id="now-upcoming"></div>
   </section>
 </div>
 <div class="sheet-bg" id="sheet" hidden></div>
-<div class="tickhud" id="tickhud" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="square" stroke-linejoin="miter"><polyline points="4.5 12.5 9.5 17.5 19.5 6.5"/></svg></div>
-<div id="announce" class="sr" aria-live="polite"></div>
+
 
 <script>
 const DAYS_AHEAD = 14; // fetch, show and check research for events starting within this many days
@@ -417,6 +425,7 @@ async function loadResearch(){
   for(const id of Object.keys(R)) if(!items.some(e => e.id === id)) delete R[id];
   lsSet("research", R); rLoading = false;
 }
+document.addEventListener("toggle", ev => { if(ev.target.id === "nowup-d") lsSet("nowUpOpen", ev.target.open); }, true);
 document.addEventListener("toggle", ev => {
   const d = ev.target; if(!d.dataset || !d.dataset.rid) return;
   rOpen[d.dataset.rid] = d.open; lsSet("ropen", rOpen);
@@ -443,6 +452,7 @@ function forgetFinished(){
   S.notes = {items: notes}; S.crossed = {items: crossed};
   if(S.seen) S.seen = {...S.seen, ids: keep(S.seen.ids)};
   if(S.nowlist && S.nowlist.items.some(i => gone.has(i.ev))) S.nowlist = {items: S.nowlist.items.filter(i => !gone.has(i.ev))};
+  if(S.guides && S.guides.evtips && [...gone].some(id => id in S.guides.evtips)){ const et = {...S.guides.evtips}; for(const id of gone) delete et[id]; S.guides = {...S.guides, evtips: et}; save("guides"); }
   if(S.guides && S.guides.bonus && [...gone].some(id => id in S.guides.bonus)){ const bb = {...S.guides.bonus}; for(const id of gone) delete bb[id]; S.guides = {...S.guides, bonus: bb}; save("guides"); }
   for(const k of ["prefs","notes","crossed","seen","nowlist"]) if(S[k]) save(k);
 }
@@ -472,13 +482,16 @@ function bosses(e){
   const out = [], seen = new Set();
   for(let part of n.split(/,\s*(?:and\s+)?|\s+and\s+/)){
     part = part.trim(); if(!part) continue;
+    const label = part.replace(/\s*\(([^)]+?)\s+Forme?\)\s*$/i, " ($1)");
     let form = "", m = /\(([^)]+?)(?:\s+Forme?)?\)\s*$/i.exec(part);
     if(m){ form = m[1]; part = part.slice(0, m.index).trim(); }
     part = part.replace(/^(Shadow|Mega|Primal|Dynamax|Gigantamax)\s+/i, "").replace(/\s+[XY]$/, "");
     const reg = /^(Alolan|Galarian|Hisuian|Paldean)\s+/.exec(part);
     if(reg){ form = REGIONAL[reg[1]]; part = part.slice(reg[0].length); }
-    const key = part+"|"+form; if(seen.has(key)) continue; seen.add(key);
-    out.push({name: part, form});
+    const key = part+"|"+form;
+    if(seen.has(key)){ const o = out.find(x => x.key === key); if(o && /\s[XY]$/.test(o.label)) o.label = o.label.replace(/\s[XY]$/, " X/Y"); continue; }
+    seen.add(key);
+    out.push({name: part, form, label, key});
   }
   return out;
 }
@@ -521,7 +534,7 @@ const GUIDE_GROUPS = {
   gbl:     {label: "GO Battle League guides", types: ["go-battle-league"], tips: [
     "Check which leagues and cups are running this week",
     "Pick a team that fits the league's CP limit"]},
-  event:   {label: "Event guides", types: [], tips: [
+  event:   {label: "General event guides", types: [], tips: [
     "Read the event's bonuses on Leek Duck",
     "Fill your incubators if there's an egg or hatch bonus"]},
   outing:  {label: "Checklist", types: [], tips: [
@@ -559,16 +572,31 @@ function tipForBonus(raw){
   if(/raid pass/.test(t)) return "Raid Passes: "+b;
   return b;
 }
+const evTipsOf = id => (S.guides && S.guides.evtips && S.guides.evtips[id]) || [];
+function setEvTips(id, list){
+  const all = {...((S.guides && S.guides.evtips) || {})};
+  if(list.length) all[id] = list; else delete all[id];
+  S.guides = {...S.guides, evtips: all}; save("guides");
+}
 const bonusEdits = id => (S.guides && S.guides.bonus && S.guides.bonus[id]) || {};
 function setBonusEdit(id, orig, text){
   const all = {...((S.guides && S.guides.bonus) || {})};
   all[id] = {...(all[id] || {}), [orig]: text};
   S.guides = {...S.guides, bonus: all}; save("guides");
 }
+function autoTipsOf(e){
+  // lines Pops Go fills in for an event: raid hundo CPs, then Leek Duck's bonuses
+  const list = [];
+  if(RAID_TYPES.has(e.type)) for(const b of bosses(e)){ const cp = hundo(b); if(cp) list.push(b.label+" CP"+cp[0]+" WB"+cp[1]); }
+  const raw = [...new Set((e.bonuses || []).concat((R[e.id] && R[e.id].bonuses) || []))];
+  const spot = e.type === "pokemon-spotlight-hour" ? e.name.replace(/\s*Spotlight Hour.*$/i, "").trim() : "";
+  for(const b of raw) list.push(spot ? "Spotlight "+spot+": "+b.replace(/\*+/g, "").trim() : tipForBonus(b));
+  return [...new Set(list)];
+}
 function bonusesOf(e){
   // [{orig, text}] after your edits; deleted ones are left out
-  const raw = [...new Set((e.bonuses || []).concat((R[e.id] && R[e.id].bonuses) || []))], ed = bonusEdits(e.id);
-  return raw.map(b => { const orig = tipForBonus(b); return {orig, text: orig in ed ? ed[orig] : orig}; }).filter(x => x.text);
+  const ed = bonusEdits(e.id);
+  return autoTipsOf(e).map(orig => ({orig, text: orig in ed ? ed[orig] : orig})).filter(x => x.text);
 }
 const nowItems = () => (S.nowlist && S.nowlist.items) || [];
 const inNow = (ev, text) => nowItems().some(i => i.ev === ev && i.text === text);
@@ -578,15 +606,9 @@ function addNow(ev, evName, text){
 }
 function nowCount(){}
 const BULB = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1.1 2V16h5v-.2c.1-.8.5-1.5 1.1-2A6 6 0 0 0 12 3z"/></svg>';
+const PLUSC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 8v8M8 12h8"/></svg>';
 const TRASH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg>';
 
-let tickTimer = null;
-function flashTick(msg){
-  const t = document.getElementById("tickhud");
-  t.classList.add("show"); clearTimeout(tickTimer);
-  tickTimer = setTimeout(() => t.classList.remove("show"), 900);
-  document.getElementById("announce").textContent = msg || "Added to Now";
-}
 let sheetFor = null, gEdit = null, gAdding = false; // sheetFor = event id or "outing"
 function openSheet(id){ if(id !== "outing"){ markSeen([id]); updateNewBadge(); } sheetFor = id; gEdit = null; gAdding = false; renderSheet(); document.body.style.overflow = "hidden"; }
 function closeSheet(){ sheetFor = null; document.getElementById("sheet").hidden = true; document.body.style.overflow = ""; }
@@ -607,39 +629,48 @@ function renderSheet(){
     : '<div class="gline"><span>'+esc(text)+'</span>'+addBtn(text)+
       '<button class="gbtn" type="button" data-gedit-open="'+esc(key)+'" aria-label="Edit">'+PEN+'</button>'+
       '<button class="gbtn" type="button" data-gdel="'+esc(key)+'" aria-label="Delete">'+TRASH+'</button></div>';
-  let h = '<div class="sheet" role="dialog" aria-modal="true" aria-label="Game plan"><div class="sheet-top"><h2>💡 '+esc(c.evName)+'</h2>'+
+  let h = '<div class="sheet" role="dialog" aria-modal="true" aria-label="Tips"><div class="sheet-top"><h2>💡 '+esc(c.evName)+' <span class="tipslbl">Tips</span></h2>'+
     '<button class="btn ghost small" type="button" data-sheet-close="1">Done</button></div>';
-  const bonus = c.ev ? bonusesOf(c.ev) : [];
-  if(bonus.length) h += '<div class="gcard">'+bonus.map(b => line("b:"+b.orig, b.text)).join("")+'</div>';
-  const guides = guidesOf(c.key);
-  h += '<div class="gcard">'+guides.map(g => line("g:"+g.id, g.text)).join("");
-  if(!guides.length) h += '<div class="gline"><span style="color:var(--muted)">Nothing here yet. Add your own below.</span></div>';
-  const typeName = GUIDE_GROUPS[c.key].label.replace(/ guides$/, "");
-  if(gAdding) h += '<form class="gform" data-gadd="'+gAdding+'"><input id="g-input" placeholder="'+(gAdding === "event" ? "Goes straight to Now, this event only" : c.ev ? "Kept for every "+esc(typeName)+" event" : "New checklist line")+'" autocomplete="off" maxlength="160"><button class="btn" type="submit">Add</button><button class="btn ghost" type="button" data-gcancel="1">Cancel</button></form>';
-  h += '<div class="gfoot">'+(gAdding ? '<span></span>' : c.ev
-      ? '<button class="linkbtn" type="button" data-gadd-open="event">+ This event only</button><button class="linkbtn" type="button" data-gadd-open="guide">+ All '+esc(typeName)+' events</button>'
-      : '<button class="linkbtn" type="button" data-gadd-open="guide">+ Add your own</button>')+
-'</div></div></div>';
+  const bonus = c.ev ? bonusesOf(c.ev) : [], guides = guidesOf(c.key);
+  const taken = new Set(bonus.map(b => b.text).concat(guides.map(g => g.text)));
+  const mine = c.ev ? evTipsOf(c.evId).filter(t => !taken.has(t.text)) : [];
+  // this event: your one-off tips, then Leek Duck's bonuses
+  if(mine.length || bonus.length) h += '<div class="gcard">'+mine.map(t => line("e:"+t.id, t.text)).join("")+bonus.map(b => line("b:"+b.orig, b.text)).join("")+'</div>';
+  // every event of this type
+  if(guides.length) h += '<div class="gcard">'+guides.map(g => line("g:"+g.id, g.text)).join("")+'</div>';
+  h += '<div class="gcard addcard">';
+  const allName = {raids: "All raids", max: "All Max Battles", cday: "All Community Days", spot: "All Spotlight Hours", gbl: "All GO Battle League", event: "All general events"}[c.key] || "All events like this";
+  if(gAdding) h += '<form class="gform" data-gadd="'+gAdding+'"><input id="g-input" placeholder="'+(gAdding === "event" ? "Tip for this event only" : c.ev ? esc(allName.replace(/^All /, "Tip for all ")) : "New checklist line")+'" autocomplete="off" maxlength="160"><button class="btn" type="submit">Add</button><button class="btn ghost" type="button" data-gcancel="1">Cancel</button></form>';
+  else h += '<div class="addrow2">'+(c.ev
+      ? '<button class="addlink" type="button" data-gadd-open="event">'+PLUSC+'This event only</button><button class="addlink" type="button" data-gadd-open="guide">'+PLUSC+esc(allName)+'</button>'
+      : '<button class="addlink" type="button" data-gadd-open="guide">'+PLUSC+'Add your own</button>')+'</div>';
+  h += '</div></div>';
   el.innerHTML = h; el.hidden = false;
   const inp = document.getElementById("g-input"); if(inp){ inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
 }
 let nowEdit = null;
 function renderNow(){
-  const body = document.getElementById("now-body"), now = new Date(), evs = S.events.items || [];
+  const body = document.getElementById("now-body"), upBox = document.getElementById("now-upcoming"), now = new Date(), evs = S.events.items || [];
   const rows = nowItems().map((i, n) => {
     const e = i.ev === "outing" ? null : evs.find(x => x.id === i.ev);
     // On now: filled dot, days until it ends. Not started yet: outlined dot, days until it starts.
     const soon = !!e && new Date(e.start) > now;
     const days = e ? Math.max(0, Math.floor((new Date(soon ? e.start : e.end) - now) / 864e5)) : null;
-    const rank = !e ? 2 : soon ? 1 : 0, at = e ? +new Date(soon ? e.start : e.end) : 0;
+    const rank = !e ? 1 : 0, at = e ? +new Date(soon ? e.start : e.end) : 0;
     return {i, n, e, days, soon, rank, at, color: e ? typeOf(e)[1] : ""};
   }).sort((a, b) => a.rank - b.rank || a.at - b.at || a.n - b.n);
-  if(!rows.length){ body.innerHTML = '<div class="nowlist"><div class="nowline"><span style="color:var(--muted)">Nothing here yet. Tap 💡 on an event and + the steps you want.</span></div></div>'; return; }
-  body.innerHTML = '<div class="nowlist">'+rows.map(({i, e, days, soon, color}) =>
+  const line = ({i, e, days, soon, color}) =>
     '<div class="nowline">'+(e ? '<span class="dot'+(soon ? ' soon' : '')+'" style="--c:'+color+'" title="'+esc(e.name)+': '+(soon ? 'starts in ' : '')+days+' day'+(days === 1 ? '' : 's')+(soon ? '' : ' left')+'">'+days+'</span>' : '<span class="dot plain" title="Checklist"></span>')+
     (nowEdit === i.id
       ? '<form class="nowform" data-nowedit="'+esc(i.id)+'"><input id="now-input" value="'+esc(i.text)+'" autocomplete="off" maxlength="160"><button class="btn small" type="submit">Save</button><button class="btn ghost small" type="button" data-nowcancel="1">Cancel</button></form>'
-      : '<span class="nowtext" data-nowtext="'+esc(i.id)+'">'+esc(i.text)+'</span>')+'<button class="x" type="button" data-nowdone="'+esc(i.id)+'" aria-label="Done: '+esc(i.text)+'">×</button></div>').join("")+'</div>';
+      : '<span class="nowtext" data-nowtext="'+esc(i.id)+'">'+esc(i.text)+'</span>')+'<button class="x" type="button" data-nowdone="'+esc(i.id)+'" aria-label="Done: '+esc(i.text)+'">×</button></div>';
+  // events happening now and the checklist stay on the page; tips for events that haven't started fold away at the bottom
+  const main = rows.filter(r => !r.soon), later = rows.filter(r => r.soon).sort((a, b) => a.at - b.at || a.n - b.n);
+  body.innerHTML = main.length ? '<div class="nowlist">'+main.map(line).join("")+'</div>'
+    : '<div class="nowlist"><div class="nowline"><span style="color:var(--muted)">Nothing here yet. Tap 💡 on an event and + the steps you want.</span></div></div>';
+  upBox.innerHTML = later.length
+    ? '<details class="nowup" id="nowup-d"'+(lsGet("nowUpOpen") ? ' open' : '')+'><summary>Upcoming Events <span class="nowup-n">'+later.length+'</span></summary><div class="nowlist">'+later.map(line).join("")+'</div></details>'
+    : '';
 }
 function showNowView(on){
   document.getElementById("main-view").hidden = on; document.getElementById("now-view").hidden = !on;
@@ -671,6 +702,7 @@ document.addEventListener("click", ev => {
   if(b.dataset.gdel){
     const k = b.dataset.gdel;
     if(k.startsWith("b:")) setBonusEdit(c.evId, k.slice(2), "");
+    else if(k.startsWith("e:")) setEvTips(c.evId, evTipsOf(c.evId).filter(t => t.id !== k.slice(2)));
     else setGuides(c.key, guidesOf(c.key).filter(g => g.id !== k.slice(2)));
     renderSheet(); return;
   }
@@ -680,7 +712,12 @@ document.addEventListener("submit", ev => {
   const f = ev.target; if(!sheetFor || !(f.dataset.gedit || f.dataset.gadd)) return;
   ev.preventDefault(); ev.stopImmediatePropagation();
   const c = sheetCtx(), text = document.getElementById("g-input").value.trim();
-  if(f.dataset.gadd === "event"){ if(text){ addNow(c.evId, c.evName, text); markSeen([c.evId]); flashTick(); } }
+  if(f.dataset.gadd === "event"){ if(text){ setEvTips(c.evId, evTipsOf(c.evId).concat({id: gid(), text})); addNow(c.evId, c.evName, text); markSeen([c.evId]); } }
+  else if(f.dataset.gedit && f.dataset.gedit.startsWith("e:")){
+    const id = f.dataset.gedit.slice(2), old = (evTipsOf(c.evId).find(t => t.id === id) || {}).text;
+    setEvTips(c.evId, text ? evTipsOf(c.evId).map(t => t.id === id ? {...t, text} : t) : evTipsOf(c.evId).filter(t => t.id !== id));
+    if(old && text && inNow(c.evId, old)){ S.nowlist = {items: nowItems().map(i => i.ev === c.evId && i.text === old ? {...i, text} : i)}; save("nowlist"); }
+  }
   else if(f.dataset.gedit && f.dataset.gedit.startsWith("b:")) setBonusEdit(c.evId, f.dataset.gedit.slice(2), text);
   else {
     const list = guidesOf(c.key).slice();
@@ -903,6 +940,16 @@ if(nowItems().some(i => /^Bonus: |\(bonus: .+\)$/.test(i.text))){
     return m ? {...i, text: tipForBonus(m[1])} : i;
   })};
   save("nowlist");
+}
+if(!(S.guides && S.guides.evtipsMigrated)){
+  const byEv = {};
+  for(const i of nowItems()){
+    if(i.ev === "outing") continue;
+    const e = (S.events.items || []).find(x => x.id === i.ev); if(!e) continue;
+    const known = new Set(guidesOf(groupFor(e)).map(g => g.text).concat(bonusesOf(e).map(b => b.text)));
+    if(!known.has(i.text)) (byEv[i.ev] = byEv[i.ev] || []).push({id: gid(), text: i.text});
+  }
+  S.guides = {...S.guides, evtips: {...((S.guides && S.guides.evtips) || {}), ...byEv}, evtipsMigrated: true}; save("guides");
 }
 forgetFinished();
 loadStats();
