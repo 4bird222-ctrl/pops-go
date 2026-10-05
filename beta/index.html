@@ -669,7 +669,7 @@ function renderNow(){
     const days = e ? Math.max(0, Math.floor((new Date(soon ? e.start : e.end) - now) / 864e5)) : null;
     const rank = !e ? 1 : 0, at = e ? +new Date(soon ? e.start : e.end) : 0;
     return {i, n, e, days, soon, rank, at, color: e ? typeOf(e)[1] : ""};
-  }).filter(r => r.e || r.i.ev === "outing") // tips for events beyond the 7-day window wait (kept) until the event comes back into view
+  }).filter(r => (r.e && new Date(r.e.end) > now) || r.i.ev === "outing") // tips for events beyond the 7-day window wait (kept) until the event comes back into view
     .sort((a, b) => a.rank - b.rank || a.at - b.at || a.n - b.n);
   const line = ({i, e, days, soon, color}) =>
     '<div class="nowline">'+(e ? '<span class="dot'+(soon ? ' soon' : '')+'" style="--c:'+color+'" title="'+esc(e.name)+': '+(soon ? 'starts in ' : '')+days+' day'+(days === 1 ? '' : 's')+(soon ? '' : ' left')+'">'+days+'</span>' : '<span class="dot plain" title="Checklist"></span>')+
@@ -972,8 +972,13 @@ loadStats();
 ensureSeen();
 render();
 showNowView(true);
-setInterval(renderEvents, 60000);
-document.addEventListener("visibilitychange", () => { if(!document.hidden) render(); });
+// every minute (and whenever the app comes back to the front): clear out finished events and refresh both pages
+function tick(){
+  forgetFinished(); render();
+  if(!document.getElementById("now-view").hidden && !nowEdit) renderNow();
+}
+setInterval(tick, 60000);
+document.addEventListener("visibilitychange", () => { if(!document.hidden) tick(); });
 
 /* ---------- events from Leek Duck (via ScrapedDuck) ---------- */
 function toItems(feed){
